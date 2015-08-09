@@ -1,0 +1,40 @@
+--- openwrt-old/target/linux/generic/config-3.18	2015-06-28 13:56:41.629075989 +0800
++++ openwrt-new/target/linux/generic/config-3.18	2015-06-28 18:27:49.000000000 +0800
+@@ -3188,6 +3188,7 @@
+ # CONFIG_SCC is not set
+ # CONFIG_SCHEDSTATS is not set
+ # CONFIG_SCHED_AUTOGROUP is not set
++CONFIG_SCHED_BFS=y
+ # CONFIG_SCHED_DEBUG is not set
+ # CONFIG_SCHED_MC is not set
+ CONFIG_SCHED_OMIT_FRAME_POINTER=y
+@@ -597,6 +597,7 @@
+ # CONFIG_CFG80211_REG_DEBUG is not set
+ # CONFIG_CFG80211_WEXT is not set
+ # CONFIG_CGROUPS is not set
++CONFIG_CGROUP_BFQIO=y
+ # CONFIG_CGROUP_DEBUG is not set
+ # CONFIG_CGROUP_NET_PRIO is not set
+ # CONFIG_CHARGER_BQ2415X is not set
+@@ -1567,6 +1568,9 @@
+ # CONFIG_INTERVAL_TREE_TEST is not set
+ # CONFIG_INV_MPU6050_IIO is not set
+ # CONFIG_IOMMU_SUPPORT is not set
++CONFIG_IOSCHED_BFQ=y
+ # CONFIG_IOSCHED_CFQ is not set
+-CONFIG_IOSCHED_DEADLINE=y
++# CONFIG_IOSCHED_DEADLINE is not set
++CONFIG_DEFAULT_BFQ=y
+-CONFIG_IOSCHED_NOOP=y
++# CONFIG_IOSCHED_NOOP is not set
++CONFIG_DEFAULT_IOSCHED="bfq"
+@@ -1783,7 +1783,7 @@
+ # CONFIG_KS8842 is not set
+ # CONFIG_KS8851 is not set
+ # CONFIG_KS8851_MLL is not set
+-# CONFIG_KSM is not set
++CONFIG_KSM=y
+ # CONFIG_KSZ884X_PCI is not set
+ CONFIG_KUSER_HELPERS=y
+ # CONFIG_KVM_GUEST is not set
+

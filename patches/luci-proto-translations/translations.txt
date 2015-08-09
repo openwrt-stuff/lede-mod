@@ -1,0 +1,69 @@
+
+msgid "Supernode server"
+msgstr "超级节点"
+
+msgid "Supernode port"
+msgstr "超级节点端口"
+
+msgid "Enable slave supernode"
+msgstr "启用从属超级节点"
+
+msgid "Slave supernode server"
+msgstr "从属超级节点"
+
+msgid "Slave supernode port"
+msgstr "从属超级节点端口"
+
+msgid "Community"
+msgstr "社区"
+
+msgid "Enable packet forwarding through n2n community."
+msgstr "允许数据包通过n2n社区转发。"
+
+msgid "Periodically resolve supernode IP"
+msgstr "周期性解析超级节点IP"
+
+msgid "Accept multicast"
+msgstr "接受广播"
+
+msgid "Accept multicast MAC addresses."
+msgstr "接受广播的MAC地址。"
+
+msgid "Bind local port"
+msgstr "绑定本地端口"
+
+msgid "Management port"
+msgstr "管理端口"
+
+msgid "Make more verbose in syslog."
+msgstr "在系统日志中显示更多信息。"
+
+msgid "Server"
+msgstr "服务器"
+
+msgid "Concurrency"
+msgstr "并发"
+
+msgid "VPN server host"
+msgstr "VPN服务器"
+
+msgid "VPN server port"
+msgstr "VPN服务器端口"
+
+msgid "User certificate (PEM encoded)"
+msgstr "用户证书(PEM编码)"
+
+msgid "User key (PEM encoded)"
+msgstr "用户密钥(PEM编码)"
+
+msgid "CA certificate (PEM encoded)"
+msgstr "CA证书(PEM编码)"
+
+msgid "TLS-auth key"
+msgstr "TLS协商密钥"
+
+msgid "When supernodes are running on dynamic IPs."
+msgstr "当超级节点为动态ip，如adsl拨号时。"
+
+msgid "Upload..."
+msgstr "上传..."

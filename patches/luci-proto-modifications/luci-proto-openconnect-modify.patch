@@ -1,0 +1,55 @@
+diff -Naur a/feeds/luci/protocols/luci-proto-openconnect/luasrc/model/cbi/admin_network/proto_openconnect.lua b/feeds/luci/protocols/luci-proto-openconnect/luasrc/model/cbi/admin_network/proto_openconnect.lua
+--- a/feeds/luci/protocols/luci-proto-openconnect/luasrc/model/cbi/admin_network/proto_openconnect.lua	2015-07-12 09:12:35.479526400 +0200
++++ b/feeds/luci/protocols/luci-proto-openconnect/luasrc/model/cbi/admin_network/proto_openconnect.lua	2015-07-12 09:16:52.000000000 +0200
+@@ -8,10 +8,24 @@
+ 
+ local ifc = net:get_interface():name()
+ 
++--add file chooser
++local file_chooser="<br/><div><input type=\"button\" class=\"file-uploader\" value=\"" .. translate("Upload...") .."\" onclick=\"" .. 
++"this.parentNode.lastChild.click();" ..
++"\"/><br/><input type=\"file\" id=\"test1\" class=\"files-upload\" style=\"display:none;\" name=\"file\" onchange=\"javascript:" .. 
++"var PARENT=this.parentNode.parentNode.parentNode.id.split('-');" .. 
++"var curnode=document.getElementById('cbid.network.'+PARENT[2]+'.'+PARENT[3]);" .. 
++"var files = this.files;if (!files.length) {alert('Please select a valid file!');return;}" .. 
++"var file=files[0];var reader=new FileReader();reader.onloadend=function(){if (this.readyState == FileReader.DONE){" .. 
++"curnode.value=this.result;}};reader.readAsText(file, 'UTF-8');" ..
++"\" accept=\".pem,.crt,.key,.csr\"/></div>"
++
++
+ oc_cert_file = "/etc/openconnect/user-cert-" .. ifc .. ".pem"
+ oc_key_file = "/etc/openconnect/user-key-" .. ifc .. ".pem"
+ oc_ca_file = "/etc/openconnect/ca-" .. ifc .. ".pem"
+ 
++--os.execute("/usr/bin/del_obsolete_openconnect.sh start &")
++
+ server = section:taboption("general", Value, "server", translate("VPN Server"))
+ server.datatype = "host"
+ 
+@@ -45,7 +59,7 @@
+ password.password = true
+ 
+ 
+-cert = section:taboption("advanced", Value, "usercert", translate("User certificate (PEM encoded)"))
++cert = section:taboption("advanced", Value, "usercert", translate("User certificate (PEM encoded)") .. file_chooser)
+ cert.template = "cbi/tvalue"
+ cert.rows = 10
+ 
+@@ -58,7 +72,7 @@
+ 	nixio.fs.writefile(oc_cert_file, value)
+ end
+ 
+-cert = section:taboption("advanced", Value, "userkey", translate("User key (PEM encoded)"))
++cert = section:taboption("advanced", Value, "userkey", translate("User key (PEM encoded)") .. file_chooser)
+ cert.template = "cbi/tvalue"
+ cert.rows = 10
+ 
+@@ -72,7 +86,7 @@
+ end
+ 
+ 
+-ca = section:taboption("advanced", Value, "ca", translate("CA certificate; if empty it will be saved after the first connection."))
++ca = section:taboption("advanced", Value, "ca", translate("CA certificate; if empty it will be saved after the first connection.") .. file_chooser)
+ ca.template = "cbi/tvalue"
+ ca.rows = 10
+ 

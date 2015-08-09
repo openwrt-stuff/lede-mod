@@ -1,0 +1,19 @@
+diff -Naur a/arch/mips/ath79/clock.c b/arch/mips/ath79/clock.c
+--- a/arch/mips/ath79/clock.c	2015-08-07 18:31:58.000000000 +0800
++++ b/arch/mips/ath79/clock.c	2015-08-08 16:39:02.000000000 +0800
+@@ -671,3 +671,15 @@
+ 	return clk->rate;
+ }
+ EXPORT_SYMBOL(clk_get_rate);
++
++int clk_set_rate(struct clk *clk, unsigned long rate)
++{
++        return 0;
++}
++EXPORT_SYMBOL(clk_set_rate);
++
++long clk_round_rate(struct clk *clk, unsigned long rate)
++{
++        return 0;
++}
++EXPORT_SYMBOL(clk_round_rate);

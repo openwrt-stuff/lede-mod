@@ -1,0 +1,13 @@
+--- a/net/ipv6/ip6_output.c	2014-07-18 06:58:15.000000000 +0800
++++ b/net/ipv6/ip6_output.c	2015-05-20 14:56:47.949895600 +0800
+@@ -371,8 +371,8 @@
+ 	struct net *net = dev_net(dst->dev);
+ 	u32 mtu;
+ 
+-	if (net->ipv6.devconf_all->forwarding == 0)
+-		goto error;
++	//if (net->ipv6.devconf_all->forwarding == 0)
++		//goto error;
+ 
+ 	if (skb_warn_if_lro(skb))
+ 		goto drop;

@@ -1,0 +1,113 @@
+diff -Naur openwrt-old/include/netfilter.mk openwrt/include/netfilter.mk
+--- openwrt-old/include/netfilter.mk	2015-06-21 00:06:38.769029432 +0800
++++ openwrt/include/netfilter.mk	2015-06-21 00:10:24.611328759 +0800
+@@ -383,3 +383,23 @@
+ IPT_BUILTIN += $(EBTABLES_WATCHERS-y)
+ 
+ endif # __inc_netfilter
++
++
++IPT_WEBURL-m :=
++IPT_WEBURL-$(CONFIG_IP_NF_MATCH_WEBURL) += $(P_V4)ipt_weburl
++IPT_BUILTIN += $(IPT_WEBURL-y)
++
++
++IPT_WEBMON-m :=
++IPT_WEBMON-$(CONFIG_IP_NF_MATCH_WEBMON) += $(P_V4)ipt_webmon
++IPT_BUILTIN += $(IPT_WEBMON-y)
++
++
++IPT_TIMERANGE-m :=
++IPT_TIMERANGE-$(CONFIG_IP_NF_MATCH_TIMERANGE) += $(P_V4)ipt_timerange
++IPT_BUILTIN += $(IPT_TIMERANGE-y)
++
++
++IPT_BANDWIDTH-m :=
++IPT_BANDWIDTH-$(CONFIG_IP_NF_MATCH_BANDWIDTH) += $(P_V4)ipt_bandwidth
++IPT_BUILTIN += $(IPT_BANDWIDTH-y)
+diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package/kernel/linux/modules/netfilter.mk
+--- openwrt-old/package/kernel/linux/modules/netfilter.mk	2015-06-21 00:06:42.044885815 +0800
++++ openwrt/package/kernel/linux/modules/netfilter.mk	2015-06-21 00:10:24.611328759 +0800
+@@ -872,3 +872,47 @@
+ 
+ $(eval $(call KernelPackage,nft-nat6))
+ 
++
++
++define KernelPackage/ipt-weburl
++  SUBMENU:=$(NF_MENU)
++  TITLE:=weburl
++  KCONFIG:=$(KCONFIG_IPT_WEBURL)
++  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*weburl*.$(LINUX_KMOD_SUFFIX)
++  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_WEBURL-m)))
++	DEPENDS:= kmod-ipt-core
++endef
++$(eval $(call KernelPackage,ipt-weburl))
++
++
++define KernelPackage/ipt-webmon
++  SUBMENU:=$(NF_MENU)
++  TITLE:=webmon
++  KCONFIG:=$(KCONFIG_IPT_WEBMON)
++  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*webmon*.$(LINUX_KMOD_SUFFIX)
++  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_WEBMON-m)))
++	DEPENDS:= kmod-ipt-core
++endef
++$(eval $(call KernelPackage,ipt-webmon))
++
++
++define KernelPackage/ipt-timerange
++  SUBMENU:=$(NF_MENU)
++  TITLE:=timerange
++  KCONFIG:=$(KCONFIG_IPT_TIMERANGE)
++  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*timerange*.$(LINUX_KMOD_SUFFIX)
++  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_TIMERANGE-m)))
++	DEPENDS:= kmod-ipt-core
++endef
++$(eval $(call KernelPackage,ipt-timerange))
++
++
++define KernelPackage/ipt-bandwidth
++  SUBMENU:=$(NF_MENU)
++  TITLE:=bandwidth
++  KCONFIG:=$(KCONFIG_IPT_BANDWIDTH)
++  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*bandwidth*.$(LINUX_KMOD_SUFFIX)
++  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_BANDWIDTH-m)))
++	DEPENDS:= kmod-ipt-core
++endef
++$(eval $(call KernelPackage,ipt-bandwidth))
+diff -Naur openwrt-old/package/network/utils/iptables/Makefile openwrt/package/network/utils/iptables/Makefile
+--- openwrt-old/package/network/utils/iptables/Makefile	2015-06-21 00:06:39.225009435 +0800
++++ openwrt/package/network/utils/iptables/Makefile	2015-06-21 00:10:24.611328759 +0800
+@@ -562,3 +562,31 @@
+ $(eval $(call BuildPackage,libxtables))
+ $(eval $(call BuildPlugin,iptables-mod-imq,$(IPT_IMQ-m)))
+ 
++
++
++define Package/iptables-mod-weburl
++$(call Package/iptables/Module, +kmod-ipt-weburl)
++  TITLE:=weburl
++endef
++$(eval $(call BuildPlugin,iptables-mod-weburl,$(IPT_WEBURL-m)))
++
++
++define Package/iptables-mod-webmon
++$(call Package/iptables/Module, +kmod-ipt-webmon)
++  TITLE:=webmon
++endef
++$(eval $(call BuildPlugin,iptables-mod-webmon,$(IPT_WEBMON-m)))
++
++
++define Package/iptables-mod-timerange
++$(call Package/iptables/Module, +kmod-ipt-timerange)
++  TITLE:=timerange
++endef
++$(eval $(call BuildPlugin,iptables-mod-timerange,$(IPT_TIMERANGE-m)))
++
++
++define Package/iptables-mod-bandwidth
++$(call Package/iptables/Module, +kmod-ipt-bandwidth)
++  TITLE:=bandwidth
++endef
++$(eval $(call BuildPlugin,iptables-mod-bandwidth,$(IPT_BANDWIDTH-m)))

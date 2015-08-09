@@ -1,0 +1,46 @@
+diff -Naur a/package/openwrt-dist-luci/files/luci/i18n/shadowsocks.zh-cn.po b/package/openwrt-dist-luci/files/luci/i18n/shadowsocks.zh-cn.po
+--- a/package/openwrt-dist-luci/files/luci/i18n/shadowsocks.zh-cn.po	2015-06-07 01:03:44.000000000 +0200
++++ b/package/openwrt-dist-luci/files/luci/i18n/shadowsocks.zh-cn.po	2015-06-01 12:38:02.000000000 +0200
+@@ -84,3 +84,9 @@
+ 
+ msgid "Forwarded IP"
+ msgstr "走代理的IP"
++
++msgid "Manual Proxy"
++msgstr "手动代理"
++
++msgid "Listen Address"
++msgstr "监听地址"
+diff -Naur a/package/openwrt-dist-luci/files/luci/model/cbi/shadowsocks.lua b/package/openwrt-dist-luci/files/luci/model/cbi/shadowsocks.lua
+--- a/package/openwrt-dist-luci/files/luci/model/cbi/shadowsocks.lua	2015-06-07 01:03:44.000000000 +0200
++++ b/package/openwrt-dist-luci/files/luci/model/cbi/shadowsocks.lua	2015-06-01 12:38:02.000000000 +0200
+@@ -4,7 +4,7 @@
+ 
+ local m, s, o, e, a
+ 
+-if luci.sys.call("pidof ss-redir >/dev/null") == 0 then
++if luci.sys.call("pidof ss-redir >/dev/null") == 0 or luci.sys.call("pidof ss-local >/dev/null") == 0 then
+ 	m = Map("shadowsocks", translate("ShadowSocks"), translate("ShadowSocks is running"))
+ else
+ 	m = Map("shadowsocks", translate("ShadowSocks"), translate("ShadowSocks is not running"))
+@@ -42,6 +42,12 @@
+ o.default = 1080
+ o:depends("use_conf_file", "")
+ 
++o = s:option(Value, "local", translate("Listen Address"))
++o.datatype = "host"
++o.placeholder = "0.0.0.0"
++o.default = "0.0.0.0"
++o:depends("use_conf_file", "")
++
+ o = s:option(Value, "timeout", translate("Connection Timeout"))
+ o.datatype = "uinteger"
+ o.placeholder = 60
+@@ -85,6 +91,7 @@
+ o = s:option(Value, "ignore_list", translate("Proxy Method"))
+ o:value("/dev/null", translate("Global Proxy"))
+ o:value("/etc/shadowsocks/ignore.list", translate("Ignore List"))
++o:value("/dev/zero", translate("Manual Proxy"))
+ o.default = "/etc/shadowsocks/ignore.list"
+ o.rmempty = false
+ 

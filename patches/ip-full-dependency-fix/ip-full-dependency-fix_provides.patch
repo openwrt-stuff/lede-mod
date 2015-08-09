@@ -1,0 +1,16 @@
+diff -Naur a/package/network/utils/iproute2/Makefile b/package/network/utils/iproute2/Makefile
+--- a/package/network/utils/iproute2/Makefile	2015-07-04 14:30:58.000000000 +0200
++++ b/package/network/utils/iproute2/Makefile	2015-07-05 03:59:53.000000000 +0200
+@@ -37,7 +37,11 @@
+   CONFLICTS:=ip-full
+ endef
+ 
+-Package/ip-full=$(call Package/iproute2/Default,full,Full)
++define Package/ip-full
++  $(call Package/iproute2/Default,full,Full)
++  PROVIDES:= ip
++  CONFLICTS:=ip
++endef
+ 
+ define Package/ip/conffiles
+ /etc/iproute2/rt_tables

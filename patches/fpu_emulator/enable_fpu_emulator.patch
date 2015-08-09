@@ -1,0 +1,11 @@
+diff -Naur openwrt-old/target/linux/ar71xx/config-4.1 openwrt-new/target/linux/ar71xx/config-4.1
+--- openwrt-old/target/linux/ar71xx/config-4.1	2015-06-05 23:00:51.838879099 +0800
++++ openwrt-new/target/linux/ar71xx/config-4.1	2015-06-05 23:02:31.000000000 +0800
+@@ -245,6 +245,7 @@
+ CONFIG_MICREL_PHY=y
+ CONFIG_MIPS=y
+ # CONFIG_MIPS_CDMM is not set
++CONFIG_MIPS_FPU_EMULATOR=y
+ # CONFIG_MIPS_HUGE_TLB_SUPPORT is not set
+ CONFIG_MIPS_L1_CACHE_SHIFT=5
+ CONFIG_MIPS_MACHINE=y

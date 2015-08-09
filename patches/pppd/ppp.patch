@@ -1,0 +1,12 @@
+diff -Naur openwrt/package/network/services/ppp/Makefile openwrt-new/package/network/services/ppp/Makefile
+--- openwrt/package/network/services/ppp/Makefile	2015-06-09 10:42:20.378254300 +0200
++++ openwrt-new/package/network/services/ppp/Makefile	2015-06-09 10:41:00.000000000 +0200
+@@ -35,7 +35,7 @@
+ 
+ define Package/ppp
+ $(call Package/ppp/Default)
+-  DEPENDS:=+kmod-ppp
++  DEPENDS:=+kmod-ppp +libpthread
+   TITLE:=PPP daemon
+   VARIANT:=default
+ endef

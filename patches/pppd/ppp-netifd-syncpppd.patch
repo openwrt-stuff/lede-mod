@@ -1,0 +1,20 @@
+diff -Naur a/package/network/services/ppp/files/ppp.sh b/package/network/services/ppp/files/ppp.sh
+--- a/package/network/services/ppp/files/ppp.sh	2015-07-04 14:30:58.000000000 +0200
++++ b/package/network/services/ppp/files/ppp.sh	2015-07-04 16:53:57.695437600 +0200
+@@ -119,7 +119,7 @@
+ 	[ "${keepalive_adaptive:-1}" -lt 1 ] && lcp_adaptive=""
+ 	[ -n "$connect" ] || json_get_var connect connect
+ 	[ -n "$disconnect" ] || json_get_var disconnect disconnect
+-
++    [ "$(uci get macvlan.config.enabled)" == "1" ] && shellsync $(cat /etc/config/network | grep -c "proto 'pppoe'") 10 | logger
+ 	proto_run_command "$config" /usr/sbin/pppd \
+ 		nodetach ipparam "$config" \
+ 		ifname "$pppname" \
+@@ -137,6 +137,7 @@
+ 		ip-down-script /lib/netifd/ppp-down \
+ 		ipv6-down-script /lib/netifd/ppp-down \
+ 		${mtu:+mtu $mtu mru $mtu} \
++		$([ "$(uci get macvlan.config.enabled)" == "1" ] && echo syncppp $(cat /etc/config/network | grep -c "proto 'pppoe'")) \
+ 		"$@" $pppd_options
+ }
+ 

@@ -1,0 +1,10 @@
+---  openwrt-old/package/system/fstools/Makefile	2015-06-07 17:43:56.340314400 +0200
++++  openwrt/package/system/fstools/Makefile	2015-06-07 17:44:34.239798200 +0200
+@@ -72,6 +72,7 @@
+ 
+ 	$(INSTALL_BIN) ./files/fstab.init $(1)/etc/init.d/fstab
+ 	$(INSTALL_DATA) ./files/fstab.default $(1)/etc/uci-defaults/10-fstab
++	$(INSTALL_DATA) ./files/automount.hotplug $(1)/etc/hotplug.d/block/10-auto-mount
+ 	$(INSTALL_DATA) ./files/mount.hotplug $(1)/etc/hotplug.d/block/10-mount
+ 
+ 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/block $(1)/sbin/

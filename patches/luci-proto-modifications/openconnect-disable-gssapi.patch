@@ -1,0 +1,11 @@
+diff -Naur a/package/feeds/packages/openconnect/Makefile b/package/feeds/packages/openconnect/Makefile
+--- a/package/feeds/packages/openconnect/Makefile	2015-07-17 08:23:49.402152500 +0200
++++ b/package/feeds/packages/openconnect/Makefile	2015-07-17 08:24:41.117711400 +0200
+@@ -50,6 +50,7 @@
+ 	--disable-shared \
+ 	--with-vpnc-script=/lib/netifd/vpnc-script \
+ 	--without-libpcsclite \
++  --without-gssapi \
+ 	--without-stoken
+ 
+ ifeq ($(CONFIG_OPENCONNECT_OPENSSL),y)

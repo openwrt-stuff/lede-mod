@@ -1,0 +1,12 @@
+diff -Naur openwrt/package/feeds/packages/mwan3/Makefile openwrt.new/package/feeds/packages/mwan3/Makefile
+--- openwrt/package/feeds/packages/mwan3/Makefile	2015-06-21 08:25:35.227527600 +0200
++++ openwrt.new/package/feeds/packages/mwan3/Makefile	2015-06-21 08:10:41.000000000 +0200
+@@ -19,7 +19,7 @@
+    SECTION:=net
+    CATEGORY:=Network
+    SUBMENU:=Routing and Redirection
+-   DEPENDS:=+ip +ipset +iptables +iptables-mod-conntrack-extra +iptables-mod-ipopt
++   DEPENDS:=+!PACKAGE_ip-full:ip +ipset +iptables +iptables-mod-conntrack-extra +iptables-mod-ipopt
+    TITLE:=Multiwan hotplug script with connection tracking support
+    MAINTAINER:=Jeroen Louwes <jeroen.louwes@gmail.com>
+    PKGARCH:=all

@@ -1,0 +1,15 @@
+diff -Naur openwrt_old/target/linux/generic/config-3.18 openwrt/target/linux/generic/config-3.18
+--- openwrt_old/target/linux/generic/config-3.18	2015-06-05 11:11:34.933830905 +0800
++++ openwrt/target/linux/generic/config-3.18	2015-06-05 11:23:08.000000000 +0800
+@@ -4629,6 +4629,11 @@
+ # CONFIG_ZLIB_DEFLATE is not set
+ # CONFIG_ZLIB_INFLATE is not set
+ # CONFIG_ZNET is not set
++CONFIG_IMQ_NUM_DEVS=2
++# CONFIG_IMQ_BEHAVIOR_AA is not set
++# CONFIG_IMQ_BEHAVIOR_AB is not set
++CONFIG_IMQ_BEHAVIOR_BA=y
++# CONFIG_IMQ_BEHAVIOR_BB is not set
+ # CONFIG_ZPOOL is not set
+ CONFIG_ZONE_DMA=y
+ CONFIG_ZONE_DMA_FLAG=1

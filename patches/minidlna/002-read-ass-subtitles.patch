@@ -1,0 +1,45 @@
+From b733e7aa6b2dbb161f20c5e929d1a863be2930cb Mon Sep 17 00:00:00 2001
+From: divanikus <aperminov@gmail.com>
+Date: Mon, 6 Apr 2015 00:43:04 +0300
+Subject: [PATCH] Read SSA and ASS subtitles too
+
+---
+ metadata.c | 10 ++++++++++
+ utils.c    |  3 ++-
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/metadata.c b/metadata.c
+index c07752a..4c25210 100644
+--- a/metadata.c
++++ b/metadata.c
+@@ -146,6 +146,16 @@ check_for_captions(const char *path, int64_t detailID)
+ 		strcpy(p, ".smi");
+ 		ret = access(file, R_OK);
+ 	}
++	if (ret != 0)
++	{
++		strcpy(p, ".ssa");
++		ret = access(file, R_OK);
++	}
++	if (ret != 0)
++	{
++		strcpy(p, ".ass");
++		ret = access(file, R_OK);
++	}
+ 
+ 	if (ret == 0)
+ 	{
+diff --git a/utils.c b/utils.c
+index 25d9733..67c4830 100644
+--- a/utils.c
++++ b/utils.c
+@@ -418,7 +418,8 @@ is_playlist(const char * file)
+ int
+ is_caption(const char * file)
+ {
+-	return (ends_with(file, ".srt") || ends_with(file, ".smi"));
++	return (ends_with(file, ".srt") || ends_with(file, ".smi") ||
++			ends_with(file, ".ssa") || ends_with(file, ".ass"));
+ }
+ 
+ int
