@@ -1,0 +1,54 @@
+diff -Naur d/tagutils/misc.h e/tagutils/misc.h
+--- d/tagutils/misc.h	2013-11-02 08:44:41.000000000 +0800
++++ e/tagutils/misc.h	2016-10-09 08:11:02.380254884 +0800
+@@ -37,14 +37,14 @@
+ #endif
+ 
+ 
+-inline __u16 le16_to_cpu(__u16 le16);
+-inline __u32 le32_to_cpu(__u32 le32);
+-inline __u64 le64_to_cpu(__u64 le64);
+-inline __u8 fget_byte(FILE *fp);
+-inline __u16 fget_le16(FILE *fp);
+-inline __u32 fget_le32(FILE *fp);
++__u16 le16_to_cpu(__u16 le16);
++__u32 le32_to_cpu(__u32 le32);
++__u64 le64_to_cpu(__u64 le64);
++__u8 fget_byte(FILE *fp);
++__u16 fget_le16(FILE *fp);
++__u32 fget_le32(FILE *fp);
+ 
+-inline __u32 cpu_to_be32(__u32 cpu32);
++__u32 cpu_to_be32(__u32 cpu32);
+ 
+ extern char * sha1_hex(char *key);
+ 
+diff -Naur d/utils.c e/utils.c
+--- d/utils.c	2016-10-09 07:10:39.000000000 +0800
++++ e/utils.c	2016-10-09 08:11:57.874770887 +0800
+@@ -33,7 +33,7 @@
+ #include "upnpglobalvars.h"
+ #include "log.h"
+ 
+-inline int
++int
+ strcatf(struct string_s *str, const char *fmt, ...)
+ {
+ 	int ret;
+@@ -52,14 +52,14 @@
+ 	return ret;
+ }
+ 
+-inline void
++void
+ strncpyt(char *dst, const char *src, size_t len)
+ {
+ 	strncpy(dst, src, len);
+ 	dst[len-1] = '\0';
+ }
+ 
+-inline int
++int
+ xasprintf(char **strp, char *fmt, ...)
+ {
+ 	va_list args;

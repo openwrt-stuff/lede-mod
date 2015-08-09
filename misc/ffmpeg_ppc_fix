@@ -1,0 +1,5 @@
+Well, I asked Google and the first hit was: Altivec. The APM82181-SoC doesn't support it, so I just
+compiled libffmpeg-mini with --disable-altivec and gave it a try with a sample .mp4 video of "Big Buck Bunny". minidlna found it and I could watch it in VLC. I also compiled libffmpeg-full, but didn't test it.
+
+Can somebody make a patch, otherwise this will never get fixed? I'm busy with something else (automatic wifi detection). As for patch suggestions: I think it would be enough to just look if the arch is 464fp and add --disable-altivec to FFMPEG_CONFIGURE in packages/multimedia/ffmpeg/Makefile.
+However, this should also be posted to ffmpeg, so they can improve their altivec detection.

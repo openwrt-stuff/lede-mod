@@ -1,0 +1,46 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2016-06-26 05:49:32.000000000 +0800
++++ b/configure.ac	2016-09-16 08:10:09.309814282 +0800
+@@ -3451,17 +3451,9 @@
+ 
+ AC_MSG_RESULT($ac_cv_buggy_getaddrinfo)
+ 
+-if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
+-then
+-	if test $ipv6 = yes
+-	then
+-		echo 'Fatal: You must get working getaddrinfo() function.'
+-		echo '       or you can specify "--disable-ipv6"'.
+-		exit 1
+-	fi
+-else
+-	AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if you have the getaddrinfo function.])
+-fi
++
++AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if you have the getaddrinfo function.])
++
+ 
+ AC_CHECK_FUNCS(getnameinfo)
+ 
+--- a/configure	2016-06-26 05:49:32.000000000 +0800
++++ b/configure	2016-09-16 08:25:21.365946380 +0800
+@@ -11788,19 +11788,9 @@
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_buggy_getaddrinfo" >&5
+ $as_echo "$ac_cv_buggy_getaddrinfo" >&6; }
+ 
+-if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
+-then
+-	if test $ipv6 = yes
+-	then
+-		echo 'Fatal: You must get working getaddrinfo() function.'
+-		echo '       or you can specify "--disable-ipv6"'.
+-		exit 1
+-	fi
+-else
+ 
+ $as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
+ 
+-fi
+ 
+ for ac_func in getnameinfo
+ do :

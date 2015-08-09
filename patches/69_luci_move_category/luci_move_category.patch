@@ -1,0 +1,97 @@
+diff -Naur a/feeds/luci/applications/luci-app-aria2/luasrc/controller/aria2.lua b/feeds/luci/applications/luci-app-aria2/luasrc/controller/aria2.lua
+--- a/feeds/luci/applications/luci-app-aria2/luasrc/controller/aria2.lua	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-aria2/luasrc/controller/aria2.lua	2016-10-08 12:53:23.194630344 +0800
+@@ -18,10 +18,11 @@
+ 		return
+ 	end
+ 
+-	local page = entry({"admin", "services", "aria2"}, cbi("aria2"), _("Aria2 Settings"))
++	entry({"admin", "nas"}, firstchild(), "NAS", 45).dependent = false
++	local page = entry({"admin", "nas", "aria2"}, cbi("aria2"), _("Aria2 Settings"))
+ 	page.dependent = true
+ 
+-	entry({"admin", "services", "aria2", "status"}, call("status")).leaf = true
++	entry({"admin", "nas", "aria2", "status"}, call("status")).leaf = true
+ 
+ end
+ 
+diff -Naur a/feeds/luci/applications/luci-app-aria2/luasrc/view/aria2/overview_status.htm b/feeds/luci/applications/luci-app-aria2/luasrc/view/aria2/overview_status.htm
+--- a/feeds/luci/applications/luci-app-aria2/luasrc/view/aria2/overview_status.htm	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-aria2/luasrc/view/aria2/overview_status.htm	2016-10-08 12:54:08.811835621 +0800
+@@ -1,5 +1,5 @@
+ <script type="text/javascript">//<![CDATA[
+-XHR.poll(5, '<%=luci.dispatcher.build_url("admin/services/aria2/status")%>', null,
++XHR.poll(5, '<%=luci.dispatcher.build_url("admin/nas/aria2/status")%>', null,
+ 	function(x, data) {
+ 		var tb = document.getElementById('aria2_status');
+ 		if (data && tb) {
+diff -Naur a/feeds/luci/applications/luci-app-hd-idle/luasrc/controller/hd_idle.lua b/feeds/luci/applications/luci-app-hd-idle/luasrc/controller/hd_idle.lua
+--- a/feeds/luci/applications/luci-app-hd-idle/luasrc/controller/hd_idle.lua	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-hd-idle/luasrc/controller/hd_idle.lua	2016-10-08 10:22:15.300679293 +0800
+@@ -10,6 +10,6 @@
+ 
+ 	local page
+ 
+-	page = entry({"admin", "services", "hd_idle"}, cbi("hd_idle"), _("hd-idle"), 60)
++	page = entry({"admin", "system", "hd_idle"}, cbi("hd_idle"), _("hd-idle"), 60)
+ 	page.dependent = true
+ end
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua b/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua
+--- a/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua	2016-10-05 21:32:09.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua	2016-10-08 10:20:29.965984808 +0800
+@@ -10,7 +10,8 @@
+ 
+ 	local page
+ 
+-	page = entry({"admin", "services", "minidlna"}, cbi("minidlna"), _("miniDLNA"))
++	entry({"admin", "nas"}, firstchild(), "NAS", 45).dependent = false
++	page = entry({"admin", "nas", "minidlna"}, cbi("minidlna"), _("miniDLNA"))
+ 	page.dependent = true
+ 
+	entry({"admin", "services", "minidlna_status"}, call("minidlna_status"))
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm b/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm
+--- a/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm	2016-10-05 21:32:09.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm	2016-10-08 10:20:50.980732793 +0800
+@@ -1,5 +1,5 @@
+ <script type="text/javascript">//<![CDATA[
+-	XHR.poll(5, '<%=url("admin/services/minidlna_status")%>', null,
++	XHR.poll(5, '<%=url("admin/nas/minidlna_status")%>', null,
+ 		function(x, st)
+ 		{
+ 			var tb = document.getElementById('minidlna_status');
+diff -Naur a/feeds/luci/applications/luci-app-samba/luasrc/controller/samba.lua b/feeds/luci/applications/luci-app-samba/luasrc/controller/samba.lua
+--- a/feeds/luci/applications/luci-app-samba/luasrc/controller/samba.lua	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-samba/luasrc/controller/samba.lua	2016-10-08 10:19:49.699534882 +0800
+@@ -11,6 +11,7 @@
+ 
+ 	local page
+ 
+-	page = entry({"admin", "services", "samba"}, cbi("samba"), _("Network Shares"))
++	entry({"admin", "nas"}, firstchild(), "NAS", 45).dependent = false
++	page = entry({"admin", "nas", "samba"}, cbi("samba"), _("Network Shares"))
+ 	page.dependent = true
+ end
+diff -Naur a/feeds/luci/applications/luci-app-transmission/luasrc/controller/transmission.lua b/feeds/luci/applications/luci-app-transmission/luasrc/controller/transmission.lua
+--- a/feeds/luci/applications/luci-app-transmission/luasrc/controller/transmission.lua	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-transmission/luasrc/controller/transmission.lua	2016-10-08 11:52:03.409246245 +0800
+@@ -8,7 +8,8 @@
+ 		return
+ 	end
+ 
+-	local page = entry({"admin", "services", "transmission"}, cbi("transmission"), _("Transmission"))
++	entry({"admin", "nas"}, firstchild(), "NAS", 45).dependent = false
++	local page = entry({"admin", "nas", "transmission"}, cbi("transmission"), _("Transmission"))
+ 	page.dependent = true
+ 
+ end
+diff -Naur a/feeds/luci/applications/luci-app-watchcat/luasrc/controller/watchcat.lua b/feeds/luci/applications/luci-app-watchcat/luasrc/controller/watchcat.lua
+--- a/feeds/luci/applications/luci-app-watchcat/luasrc/controller/watchcat.lua	2016-10-05 21:27:01.000000000 +0800
++++ b/feeds/luci/applications/luci-app-watchcat/luasrc/controller/watchcat.lua	2016-10-08 10:38:43.859677350 +0800
+@@ -7,5 +7,6 @@
+    if not nixio.fs.access("/etc/config/system") then
+       return
+    end
++   entry({"admin", "nas"}, firstchild(), "NAS", 45).dependent = false
+-   entry({"admin", "services", "watchcat"}, cbi("watchcat/watchcat"), _("Watchcat"), 90)
++   entry({"admin", "system", "watchcat"}, cbi("watchcat/watchcat"), _("Watchcat"), 90)
+ end

@@ -1,0 +1,7 @@
+define Package/v4l-utils
+  $(call Package/libv4l/Default)
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE+= utilities
+  DEPENDS := +libv4l $(CXX_DEPENDS) $(ICONV_DEPENDS) $(INTL_DEPENDS)
+endef

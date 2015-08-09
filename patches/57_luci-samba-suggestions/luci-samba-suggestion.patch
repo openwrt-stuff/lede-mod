@@ -1,0 +1,17 @@
+diff -Naur a/feeds/luci/applications/luci-app-samba/luasrc/model/cbi/samba.lua b/feeds/luci/applications/luci-app-samba/luasrc/model/cbi/samba.lua
+--- a/feeds/luci/applications/luci-app-samba/luasrc/model/cbi/samba.lua	2016-09-12 07:41:57.000000000 +0800
++++ b/feeds/luci/applications/luci-app-samba/luasrc/model/cbi/samba.lua	2016-09-20 19:54:23.768848776 +0800
+@@ -44,6 +44,13 @@
+ pth = s:option(Value, "path", translate("Path"))
+ if nixio.fs.access("/etc/config/fstab") then
+         pth.titleref = luci.dispatcher.build_url("admin", "system", "fstab")
++        local command = "uci show fstab|grep -E \"\\.target\\=\"|grep -oE \"/[^\\'\\\"]*\"|sed ':a;N;$!ba;s/\\n/:/g'"
++        local pth_suggestions = luci.sys.exec(command)
++        if pth_suggestions then
++                for entry in string.gmatch(pth_suggestions, "[^:]+") do
++                        pth:value(entry)
++                end
++        end
+ end
+ 
+ s:option(Value, "users", translate("Allowed users")).rmempty = true

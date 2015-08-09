@@ -1,0 +1,20 @@
+diff -Naur a/package/network/services/ppp/files/ppp.sh b/package/network/services/ppp/files/ppp.sh
+--- a/package/network/services/ppp/files/ppp.sh	2015-07-04 14:30:58.000000000 +0200
++++ b/package/network/services/ppp/files/ppp.sh	2015-07-04 16:53:57.695437600 +0200
+@@ -211,7 +211,16 @@
+ 	json_get_var service service
+ 	json_get_var host_uniq host_uniq
+ 
++#By 蝈蝈：并发拨号同步的前期准备
++	syncppp_option=""
++	[ "$(uci get syncdial.config.enabled)" == "1" ] && {
++		ppp_if_cnt=$(cat /etc/config/network | grep -c "proto 'pppoe'")
++		syncppp_option="syncppp $ppp_if_cnt"
++		shellsync $ppp_if_cnt 10
++	}
++
+ 	ppp_generic_setup "$config" \
++		$syncppp_option \
+ 		plugin rp-pppoe.so \
+ 		${ac:+rp_pppoe_ac "$ac"} \
+ 		${service:+rp_pppoe_service "$service"} \

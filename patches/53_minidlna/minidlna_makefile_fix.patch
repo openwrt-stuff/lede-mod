@@ -1,0 +1,25 @@
+--- a/package/feeds/packages/minidlna/Makefile	2016-10-10 08:15:21.000000000 +0800
++++ b/package/feeds/packages/minidlna/Makefile	2016-10-11 12:30:43.064827028 +0800
+@@ -31,7 +31,7 @@
+   TITLE:=UPnP A/V & DLNA Media Server
+   URL:=http://minidlna.sourceforge.net/
+   DEPENDS:= +libpthread +libexif +libjpeg +libsqlite3 +libffmpeg \
+-  	+libid3tag +libflac +libvorbis +libuuid \
++  	+libid3tag +libflac +libvorbis +libuuid +libpng \
+   	$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+@@ -73,6 +73,13 @@
+ 	--with-db-path="/var/run/minidlna" \
+ 	--with-log-path="/var/log" \
+ 
++define Build/Prepare
++	$(call Build/Prepare/Default)
++	cd $(PKG_BUILD_DIR) && autoreconf && sed -i 's/0.18/0.19/g' po/Makefile.in.in #gettextize -f
++endef
++
+ define Package/minidlna/install
+ 	$(INSTALL_DIR) $(1)/usr/bin
++	$(INSTALL_DIR) $(1)/usr/share/minidlna
++	$(INSTALL_DATA) ./files/dlna.png $(1)/usr/share/minidlna/dlna.png
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/minidlnad $(1)/usr/bin/minidlna

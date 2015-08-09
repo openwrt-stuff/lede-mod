@@ -1,0 +1,16 @@
+diff -Naur a/feeds/luci/applications/luci-app-privoxy/root/etc/uci-defaults/40_luci-privoxy b/feeds/luci/applications/luci-app-privoxy/root/etc/uci-defaults/40_luci-privoxy
+--- a/feeds/luci/applications/luci-app-privoxy/root/etc/uci-defaults/40_luci-privoxy	2016-09-12 07:41:57.000000000 +0800
++++ b/feeds/luci/applications/luci-app-privoxy/root/etc/uci-defaults/40_luci-privoxy	2016-09-20 18:04:34.529352822 +0800
+@@ -2,6 +2,12 @@
+ 
+ # no longer needed for "Save and Apply" to restart privoxy
+ # luci-app-privoxy calls /etc/init.d/privoxy reload
++
++/etc/init.d/privoxy enabled && {
++	/etc/init.d/privoxy stop
++	/etc/init.d/privoxy disable
++}
++
+ uci -q batch <<-EOF >/dev/null
+ 	delete ucitrack.@privoxy[-1]
+ 	commit ucitrack

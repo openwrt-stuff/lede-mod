@@ -1,0 +1,14 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2016-09-19 20:36:48.000000000 +0800
++++ b/configure.ac	2016-10-01 19:35:14.583774326 +0800
+@@ -3,8 +3,8 @@
+ LT_INIT([disable-static])
+ 
+ dnl Find a better way to do this
+-AC_DEFINE(PEER_NAME, "-lt0D60-", Identifier that is part of the default peer id)
+-AC_DEFINE(PEER_VERSION, "lt\x0D\x60", 4 byte client and version identifier for DHT)
++AC_DEFINE(PEER_NAME, "-ut2210-", Identifier that is part of the default peer id)
++AC_DEFINE(PEER_VERSION, "ut\x22\x10", 4 byte client and version identifier for DHT)
+ 
+ LIBTORRENT_CURRENT=19
+ LIBTORRENT_REVISION=0

@@ -1,0 +1,299 @@
+diff --git a/inotify.c b/inotify.c
+index 745436c..6a09adc 100644
+--- a/inotify.c
++++ b/inotify.c
+@@ -358,6 +358,8 @@ inotify_insert_file(char * name, const char * path)
+ 	if( stat(path, &st) != 0 )
+ 		return -1;
+ 
++	bk_destroy_bktable();
++
+ 	ts = sql_get_int_field(db, "SELECT TIMESTAMP from DETAILS where PATH = '%q'", path);
+ 	if( !ts && is_playlist(path) && (sql_get_int_field(db, "SELECT ID from PLAYLISTS where PATH = '%q'", path) > 0) )
+ 	{
+@@ -549,6 +551,7 @@ inotify_remove_file(const char * path)
+ 	id = sql_get_text_field(db, "SELECT ID from %s where PATH = '%q'", playlist?"PLAYLISTS":"DETAILS", path);
+ 	if( !id )
+ 		return 1;
++	bk_destroy_bktable();
+ 	detailID = strtoll(id, NULL, 10);
+ 	sqlite3_free(id);
+ 	if( playlist )
+@@ -614,6 +617,8 @@ inotify_remove_directory(int fd, const char * path)
+ 	int64_t detailID = 0;
+ 	int rows, i, ret = 1;
+ 
++	bk_destroy_bktable();
++
+ 	/* Invalidate the scanner cache so we don't insert files into non-existent containers */
+ 	valid_cache = 0;
+ 	remove_watch(fd, path);
+diff --git a/minidlna.c b/minidlna.c
+index 7933f54..aac977b 100644
+--- a/minidlna.c
++++ b/minidlna.c
+@@ -299,6 +299,8 @@ open_db(sqlite3 **sq3)
+ 	sql_exec(db, "pragma journal_mode = OFF");
+ 	sql_exec(db, "pragma synchronous = OFF;");
+ 	sql_exec(db, "pragma default_cache_size = 8192;");
++	bk_bktable_exists = sql_get_int_field(db, "SELECT count(name) FROM sqlite_master WHERE type='table' AND name='bk'");
++	DPRINTF(E_WARN, L_GENERAL, "bktable_exists = %d\n", bk_bktable_exists);
+ 
+ 	return new_db;
+ }
+diff --git a/scanner.c b/scanner.c
+index 33b961a..1734d87 100644
+--- a/scanner.c
++++ b/scanner.c
+@@ -57,6 +57,7 @@ typedef struct dirent scan_filter;
+ #endif
+ 
+ int valid_cache = 0;
++int bk_bktable_exists;
+ 
+ struct virtual_item
+ {
+@@ -572,6 +573,7 @@ CreateDatabase(void)
+ 	ret = sql_exec(db, "INSERT into SETTINGS values ('UPDATE_ID', '0')");
+ 	if( ret != SQLITE_OK )
+ 		goto sql_failed;
++	bk_bktable_exists = 0;
+ 	for( i=0; containers[i]; i=i+3 )
+ 	{
+ 		ret = sql_exec(db, "INSERT into OBJECTS (OBJECT_ID, PARENT_ID, DETAIL_ID, CLASS, NAME)"
+@@ -842,6 +844,8 @@ start_scanner()
+ 	struct media_dir_s *media_path;
+ 	char path[MAXPATHLEN];
+ 
++	bk_destroy_bktable();
++
+ 	if (setpriority(PRIO_PROCESS, 0, 15) == -1)
+ 		DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce scanner thread priority\n");
+ 	_notify_start();
+@@ -891,3 +895,12 @@ start_scanner()
+ 	//JM: Set up a db version number, so we know if we need to rebuild due to a new structure.
+ 	sql_exec(db, "pragma user_version = %d;", DB_VERSION);
+ }
++
++void bk_destroy_bktable(void)
++{
++	if (bk_bktable_exists)
++	{
++		sql_exec(db, "DROP TABLE bk");
++		bk_bktable_exists = 0;
++	}
++}
+diff --git a/scanner.h b/scanner.h
+index d220762..ba29fd3 100644
+--- a/scanner.h
++++ b/scanner.h
+@@ -83,4 +83,7 @@ CreateDatabase(void);
+ void
+ start_scanner();
+ 
++void bk_destroy_bktable(void);
++extern int bk_bktable_exists;
++
+ #endif
+diff --git a/upnpsoap.c b/upnpsoap.c
+index 8066318..c600b60 100644
+--- a/upnpsoap.c
++++ b/upnpsoap.c
+@@ -1681,11 +1681,13 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+ 	int ret;
+ 	const char *ContainerID;
+ 	char *Filter, *SearchCriteria, *SortCriteria;
+-	char *orderBy = NULL, *where = NULL, sep[] = "$*";
++	char *orderBy = NULL, *where = NULL, *BKrequest = NULL, *BKrequestcount = NULL, sep[] = "$*";
+ 	char groupBy[] = "group by DETAIL_ID";
++	char *bksearch;
+ 	struct NameValueParserData data;
+ 	int RequestedCount = 0;
+ 	int StartingIndex = 0;
++	char BKcustomization = 0;
+ 
+ 	memset(&args, 0, sizeof(args));
+ 	memset(&str, 0, sizeof(str));
+@@ -1753,13 +1755,119 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+ 	where = parse_search_criteria(SearchCriteria, sep);
+ 	DPRINTF(E_DEBUG, L_HTTP, "Translated SearchCriteria: %s\n", where);
+ 
+-	totalMatches = sql_get_int_field(db, "SELECT (select count(distinct DETAIL_ID)"
+-	                                     " from OBJECTS o left join DETAILS d on (o.DETAIL_ID = d.ID)"
+-	                                     " where (OBJECT_ID glob '%q%s') and (%s))"
+-	                                     " + "
+-	                                     "(select count(*) from OBJECTS o left join DETAILS d on (o.DETAIL_ID = d.ID)"
+-	                                     " where (OBJECT_ID = '%q') and (%s))",
+-	                                     ContainerID, sep, where, ContainerID, where);
++	bksearch = strstr(where, "o.CLASS = \"container.album.musicAlbum\" and d.TITLE like \"%");
++	if (bksearch)
++	{
++	    /*
++	      We assume that parse_search_criteria is of the shape
++	         o.CLASS = "container.album.musicAlbum" and d.TITLE like "%mozart piano%"
++	      and nothing else.  The string "%mozart piano%" is therefore where+56.
++	    */
++	    char *p;
++
++		bksearch += 58;
++		if ((p = strstr(bksearch, "%\"")))
++		{
++			*p = 0;
++	        /*
++			  searchtranslated must be:
++			  mozart* piano*
++	        */
++			char *bksearchtranslated = malloc(strlen(bksearch)*2 + 1), *q;
++			size_t templength;
++
++			if (!bksearchtranslated)
++				goto BKfailed;
++			q = bksearchtranslated;
++			for (p = strtok(bksearch, " "); p; p = strtok(NULL, " "))
++			{
++				templength = strlen(p);
++				memcpy(q, p, templength);
++				q += templength;
++				*q++ = '*';
++				*q++ = ' ';
++			}
++			if (q > bksearchtranslated)
++				q--;
++			*q = 0;
++
++			DPRINTF(E_DEBUG, L_HTTP, "Translated search: <%s>\n", bksearchtranslated);
++
++	        if (asprintf(&BKrequest,
++					 "SELECT o.OBJECT_ID, o.PARENT_ID, o.REF_ID, o.DETAIL_ID, o.CLASS, d.SIZE, d.TITLE, d.DURATION, d.BITRATE, d.SAMPLERATE, d.ARTIST, d.ALBUM, d.GENRE, d.COMMENT, d.CHANNELS, "
++					 "d.TRACK, d.DATE, d.RESOLUTION, d.THUMBNAIL, d.CREATOR, d.DLNA_PN, d.MIME, d.ALBUM_ART, d.ROTATION, d.DISC "
++					 "from bk f left join DETAILS d on (d.ID = f.DETAIL_ID) "
++					 "left join OBJECTS o on (f.DETAIL_ID = o.DETAIL_ID) "
++					 "where o.REF_ID is NULL and o.OBJECT_ID glob '*$*' and f.CONTENT MATCH '%s' "
++					 "group by o.DETAIL_ID   limit %d, %d",
++						 bksearchtranslated, StartingIndex, RequestedCount) == -1)
++				BKrequest = NULL;
++			if (asprintf(&BKrequestcount,
++					 "SELECT count(distinct o.DETAIL_ID) "
++					 "from bk f left join DETAILS d on (d.ID = f.DETAIL_ID) "
++					 "left join OBJECTS o on (f.DETAIL_ID = o.DETAIL_ID) "
++						 "where o.REF_ID is NULL and o.OBJECT_ID glob '*$*' and f.CONTENT MATCH '%s'",
++						 bksearchtranslated) == -1)
++				BKrequestcount = NULL;
++		BKfailed:
++			if (BKrequest && BKrequestcount)
++			{
++				BKcustomization = 1;
++				if (!bk_bktable_exists)
++				{
++					char create_bktable_sqlite[] =
++						"CREATE VIRTUAL TABLE bk USING fts4(tokenize=unicode61, "
++						"DETAIL_ID INTEGER DEFAULT NULL, "
++						"CONTENT TEXT DEFAULT NULL);";
++					char populate_bktable_sqlite[] =
++						"INSERT INTO bk "
++						"SELECT o.DETAIL_ID, group_concat(de.TITLE, ' ') || ' ' || d.ARTIST || ' ' || d.TITLE "
++						"from "
++						"OBJECTS o "
++						"join DETAILS d on (d.ID = o.DETAIL_ID) "
++						"join OBJECTS e on (o.OBJECT_ID = e.PARENT_ID) "
++						"join DETAILS de on (de.ID = e.DETAIL_ID) "
++						"where o.OBJECT_ID glob '*$*' and e.CLASS like 'item.audioItem%%' and o.CLASS = 'container.album.musicAlbum' "
++						"group by o.DETAIL_ID;";
++					char optimize_bktable_sqlite[] = "INSERT INTO bk(bk) VALUES('optimize');";
++					int ret;
++
++					DPRINTF(E_DEBUG, L_HTTP, "create SQL: %s\n", create_bktable_sqlite);
++
++					ret = sql_exec(db, create_bktable_sqlite);
++					if (ret == SQLITE_OK)
++					{
++						DPRINTF(E_DEBUG, L_HTTP, "populate SQL: %s\n", populate_bktable_sqlite);
++						ret = sql_exec(db, populate_bktable_sqlite);
++						if (ret == SQLITE_OK)
++							{
++							DPRINTF(E_DEBUG, L_HTTP, "optimize SQL: %s\n", optimize_bktable_sqlite);
++							ret = sql_exec(db, optimize_bktable_sqlite);
++							}
++					}
++					if( ret != SQLITE_OK )
++						DPRINTF(E_ERROR, L_DB_SQL, "Error creating SQLite3 database!\n");
++					else
++						bk_bktable_exists = 1;
++				}
++	            totalMatches = sql_get_int_field(db, BKrequestcount);
++			}
++			if (bksearchtranslated)
++				free(bksearchtranslated);
++	    }
++	}
++
++	if (!BKcustomization)
++	{
++	    totalMatches = sql_get_int_field(db, "SELECT (select count(distinct DETAIL_ID)"
++	                                         " from OBJECTS o left join DETAILS d on (o.DETAIL_ID = d.ID)"
++	                                         " where (OBJECT_ID glob '%q%s') and (%s))"
++	                                         " + "
++	                                         "(select count(*) from OBJECTS o left join DETAILS d on (o.DETAIL_ID = d.ID)"
++	                                         " where (OBJECT_ID = '%q') and (%s))",
++	                                         ContainerID, sep, where, ContainerID, where);
++	}
++
+ 	if( totalMatches < 0 )
+ 	{
+ 		/* Must be invalid SQL, so most likely bad or unhandled search criteria. */
+@@ -1785,17 +1893,23 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+ 		goto search_error;
+ 	}
+ 
+-	sql = sqlite3_mprintf( SELECT_COLUMNS
+-	                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
+-	                      " where OBJECT_ID glob '%q%s' and (%s) %s "
+-	                      "%z %s"
+-	                      " limit %d, %d",
+-	                      ContainerID, sep, where, groupBy,
+-	                      (*ContainerID == '*') ? NULL :
+-	                      sqlite3_mprintf("UNION ALL " SELECT_COLUMNS
+-	                                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
+-	                                      " where OBJECT_ID = '%q' and (%s) ", ContainerID, where),
+-	                      orderBy, StartingIndex, RequestedCount);
++	if (BKcustomization)
++	    sql = BKrequest;
++	else
++	{
++	    sql = sqlite3_mprintf( SELECT_COLUMNS
++	                          "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
++	                          " where OBJECT_ID glob '%q%s' and (%s) %s "
++	                          "%z %s"
++	                          " limit %d, %d",
++	                          ContainerID, sep, where, groupBy,
++	                          (*ContainerID == '*') ? NULL :
++	                          sqlite3_mprintf("UNION ALL " SELECT_COLUMNS
++	                                          "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
++	                                          " where OBJECT_ID = '%q' and (%s) ", ContainerID, where),
++	                          orderBy, StartingIndex, RequestedCount);
++	}
++
+ 	DPRINTF(E_DEBUG, L_HTTP, "Search SQL: %s\n", sql);
+ 	ret = sqlite3_exec(db, sql, callback, (void *) &args, &zErrMsg);
+ 	if( (ret != SQLITE_OK) && (zErrMsg != NULL) )
+@@ -1803,7 +1917,8 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+ 		DPRINTF(E_WARN, L_HTTP, "SQL error: %s\nBAD SQL: %s\n", zErrMsg, sql);
+ 		sqlite3_free(zErrMsg);
+ 	}
+-	sqlite3_free(sql);
++	if (!BKcustomization)
++		sqlite3_free(sql);
+ 	ret = strcatf(&str, "&lt;/DIDL-Lite&gt;</Result>\n"
+ 	                    "<NumberReturned>%u</NumberReturned>\n"
+ 	                    "<TotalMatches>%u</TotalMatches>\n"
+@@ -1815,6 +1930,10 @@ search_error:
+ 	ClearNameValueList(&data);
+ 	free(orderBy);
+ 	free(where);
++	if (BKrequest)
++		free(BKrequest);
++	if (BKrequestcount)
++		free(BKrequestcount);
+ 	free(str.data);
+ }
+ 

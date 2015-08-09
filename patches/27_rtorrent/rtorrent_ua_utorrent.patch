@@ -1,0 +1,12 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2016-09-19 20:50:25.000000000 +0800
++++ b/configure.ac	2016-10-01 19:36:39.757607628 +0800
+@@ -53,7 +53,7 @@
+ AC_LANG_POP(C++)
+ 
+ AC_DEFINE(HAVE_CONFIG_H, 1, true if config.h was included)
+-AC_DEFINE(USER_AGENT, [std::string(PACKAGE "/" VERSION "/") + torrent::version()], Http user agent)
++AC_DEFINE(USER_AGENT, "uTorrent/2210(25130)", Http user agent)
+ 
+ AC_CHECK_FUNCS(posix_memalign)
+ TORRENT_CHECK_CACHELINE()

@@ -1,0 +1,52 @@
+diff -Naur a/metadata.c b/metadata.c
+--- a/metadata.c	2013-11-02 08:44:41.000000000 +0800
++++ b/metadata.c	2016-10-09 07:10:39.177310126 +0800
+@@ -883,6 +883,12 @@
+ 			xasprintf(&m.mime, "video/x-matroska");
+ 		else if( strcmp(ctx->iformat->name, "flv") == 0 )
+ 			xasprintf(&m.mime, "video/x-flv");
++		//----add----  rmvb
++		else if( strcmp(ctx->iformat->name, "rm") == 0 )  
++    			xasprintf(&m.mime, "video/x-pn-realvideo");  
++		else if( strcmp(ctx->iformat->name, "rmvb") == 0 )  
++    			xasprintf(&m.mime, "video/x-pn-realvideo");  
++		//---end----  
+ 		if( m.mime )
+ 			goto video_no_dlna;
+ 
+diff -Naur a/upnpglobalvars.h b/upnpglobalvars.h
+--- a/upnpglobalvars.h	2013-11-02 08:44:41.000000000 +0800
++++ b/upnpglobalvars.h	2016-10-09 07:10:39.178310151 +0800
+@@ -168,8 +168,10 @@
+ 	"http-get:*:audio/mp4:*," \
+ 	"http-get:*:audio/x-wav:*," \
+ 	"http-get:*:audio/x-flac:*," \
++	"http-get:*:video/x-pn-realvideo:*" \ 
+ 	"http-get:*:application/ogg:*"
+ 
++//rmvb
+ #define DLNA_FLAG_DLNA_V1_5      0x00100000
+ #define DLNA_FLAG_HTTP_STALLING  0x00200000
+ #define DLNA_FLAG_TM_B           0x00400000
+diff -Naur a/utils.c b/utils.c
+--- a/utils.c	2013-11-02 08:44:41.000000000 +0800
++++ b/utils.c	2016-10-09 07:10:39.179310176 +0800
+@@ -352,6 +352,8 @@
+ 				return "3gp";
+ 			else if( strncmp(mime+6, "x-tivo-mpeg", 11) == 0 )
+ 				return "TiVo";
++			else if( strcmp(mime+6, "x-pn-realvideo") == 0 )
++				return "rmvb";
+ 			break;
+ 		case 'i':
+ 			if( strcmp(mime+6, "jpeg") == 0 )
+@@ -376,6 +378,9 @@
+ 		ends_with(file, ".m2t") || ends_with(file, ".mkv")   ||
+ 		ends_with(file, ".vob") || ends_with(file, ".ts")    ||
+ 		ends_with(file, ".flv") || ends_with(file, ".xvid")  ||
++		//rmvb
++		ends_with(file, ".rm")  || ends_with(file, ".rmvb")  ||  
++		
+ #ifdef TIVO_SUPPORT
+ 		ends_with(file, ".TiVo") ||
+ #endif

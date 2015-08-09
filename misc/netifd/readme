@@ -1,0 +1,3 @@
+package/network/config/netifd/files/lib/network/config.sh
+
+[[ -f "/usr/share/libubox/jshn.sh" ]] && . /usr/share/libubox/jshn.sh

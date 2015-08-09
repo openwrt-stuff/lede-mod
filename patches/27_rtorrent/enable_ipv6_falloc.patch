@@ -1,0 +1,15 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2016-10-01 21:36:06.000000000 +0800
++++ b/Makefile	2016-09-30 17:16:54.000000000 +0800
+@@ -71,9 +71,10 @@
+ 	--enable-aligned \
+ 	--disable-debug \
+ 	--enable-openssl \
++	--with-posix-fallocate \
+ 	--disable-instrumentation \
+ 	--with-zlib=$(STAGING_DIR)/usr \
+-	--disable-ipv6
++	--enable-ipv6
+ 
+ define Build/InstallDev
+ 	$(INSTALL_DIR) $(1)/usr/include

@@ -1,0 +1,145 @@
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua b/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua
+--- a/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua	2016-10-10 08:14:17.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua	2016-10-10 08:33:16.947757319 +0800
+@@ -14,6 +14,7 @@
+ 	page.dependent = true
+ 
+ 	entry({"admin", "services", "minidlna_status"}, call("minidlna_status"))
++	entry({"admin", "services", "minidlna_rebuild"}, post("minidlna_rebuild") ).leaf = true
+ end
+ 
+ function minidlna_status()
+@@ -44,3 +45,8 @@
+ 	luci.http.prepare_content("application/json")
+ 	luci.http.write_json(status)
+ end
++
++function minidlna_rebuild()
++	luci.sys.call("touch /tmp/minidlna_rebuild")
++	luci.sys.call("/etc/init.d/minidlna restart")
++end
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/model/cbi/minidlna.lua b/feeds/luci/applications/luci-app-minidlna/luasrc/model/cbi/minidlna.lua
+--- a/feeds/luci/applications/luci-app-minidlna/luasrc/model/cbi/minidlna.lua	2016-10-10 08:14:17.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/luasrc/model/cbi/minidlna.lua	2016-10-10 08:16:04.806043496 +0800
+@@ -84,6 +84,11 @@
+ o.rmempty = true
+ o.placeholder = "/var/log"
+ 
++o = s:taboption("advanced", Value, "locale", translate("Locale:"),
++	translate("Set locale when MiniDLNA starts."))
++o.rmempty = true
++o.placeholder = "en_US.UTF-8"
++
+ s:taboption("advanced", Flag, "inotify", translate("Enable inotify:"),
+ 	translate("Set this to enable inotify monitoring to automatically discover new files."))
+ 
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm b/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm
+--- a/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm	2016-10-10 08:14:17.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/luasrc/view/minidlna_status.htm	2016-10-10 08:40:08.285927638 +0800
+@@ -19,6 +19,14 @@
+ 			}
+ 		}
+ 	);
++function onclick_rebuild(id) {
++	var btnXHR = new XHR();
++	if(confirm("<%:Rebuilding database could take several minutes, proceed?%>")) {
++	btnXHR.post('<%=url('admin/services/minidlna_rebuild')%>', { token: '<%=token%>' },
++		function(x, data) { void(0); }
++	);
++	}
++}
+ //]]></script>
+ 
+ <fieldset class="cbi-section">
+@@ -26,4 +32,7 @@
+ 	<p id="minidlna_status">
+ 		<em><%:Collecting data...%></em>
+ 	</p>
++	<br/><p id="minidlna_rebuild">
++		<input class="cbi-button cbi-button-apply" id="btn_rebuild" style="font-size: 100%;" value="<%:Rebuild Database%>" type="button" onclick="onclick_rebuild(this.id)">
++	</p>
+ </fieldset>
+diff -Naur a/feeds/luci/applications/luci-app-minidlna/po/zh-cn/minidlna.po b/feeds/luci/applications/luci-app-minidlna/po/zh-cn/minidlna.po
+--- a/feeds/luci/applications/luci-app-minidlna/po/zh-cn/minidlna.po	2016-10-10 08:14:17.000000000 +0800
++++ b/feeds/luci/applications/luci-app-minidlna/po/zh-cn/minidlna.po	2016-10-10 08:47:40.178606563 +0800
+@@ -170,3 +170,15 @@
+ 
+ msgid "miniSSDP socket:"
+ msgstr "miniSSDP socket："
++
++msgid "Set locale when MiniDLNA starts."
++msgstr "设置语言环境"
++
++msgid "Locale:"
++msgstr "语言环境："
++
++msgid "Rebuild Database"
++msgstr "重建数据库"
++
++msgid "Rebuilding database could take several minutes, proceed?"
++msgstr "重建数据库可能需要几分钟时间，是否继续？"
+diff -Naur a/feeds/packages/multimedia/minidlna/files/minidlna.config b/feeds/packages/multimedia/minidlna/files/minidlna.config
+--- a/feeds/packages/multimedia/minidlna/files/minidlna.config	2016-10-10 08:15:21.000000000 +0800
++++ b/feeds/packages/multimedia/minidlna/files/minidlna.config	2016-10-10 08:16:04.806043496 +0800
+@@ -15,3 +15,4 @@
+ 	option root_container '.'
+ 	list media_dir '/mnt'
+ 	option album_art_names 'Cover.jpg/cover.jpg/AlbumArtSmall.jpg/albumartsmall.jpg/AlbumArt.jpg/albumart.jpg/Album.jpg/album.jpg/Folder.jpg/folder.jpg/Thumb.jpg/thumb.jpg'
++	option locale 'zh_CN.UTF-8'
+diff -Naur a/feeds/packages/multimedia/minidlna/files/minidlna.init b/feeds/packages/multimedia/minidlna/files/minidlna.init
+--- a/feeds/packages/multimedia/minidlna/files/minidlna.init	2016-10-10 08:15:21.000000000 +0800
++++ b/feeds/packages/multimedia/minidlna/files/minidlna.init	2016-10-10 08:17:46.162612343 +0800
+@@ -7,6 +7,7 @@
+ SERVICE_PID_FILE=/var/run/minidlna/minidlna.pid
+ 
+ MINIDLNA_CONFIG_FILE="/tmp/minidlna.conf"
++MINIDLNAD="/usr/bin/minidlna"
+ 
+ minidlna_cfg_append() {
+ 	echo "$1" >> "$MINIDLNA_CONFIG_FILE"
+@@ -46,6 +47,7 @@
+ 
+ 	config_get port $cfg port
+ 	config_get interface $cfg interface
++	config_get locale $1 locale
+ 
+ 	[ -z "$interface" -o -t "$port" ] && return 1
+ 
+@@ -57,9 +58,10 @@
+ 	minidlna_cfg_append "port=$port"
+ 	minidlna_cfg_append "network_interface=$interface"
++	minidlna_cfg_append "icon=/usr/share/minidlna/dlna.png,0xffffff"
+ 
+ 	minidlna_cfg_addstr $cfg friendly_name
+ 	minidlna_cfg_addstr $cfg db_dir
+ 	minidlna_cfg_addstr $cfg log_dir
+ 	minidlna_cfg_addbool $cfg inotify '1'
+ 	minidlna_cfg_addbool $cfg enable_tivo '0'
+ 	minidlna_cfg_addbool $cfg strict_dlna '0'
+@@ -76,6 +78,7 @@
+ 	local enabled
+ 	local db_dir
+ 	local log_dir
++	local scan
+ 
+ 	config_load 'minidlna'
+ 	config_get_bool enabled config 'enabled' '0'
+@@ -89,7 +92,17 @@
+ 
+ 	mkdir -m 0755 -p $db_dir
+ 	mkdir -m 0755 -p $log_dir
+-	service_start /usr/bin/minidlna -f "$MINIDLNA_CONFIG_FILE"
++	[[ -z "$locale" ]] || export LANG=$locale
++	
++	scan=""
++	if [[ -f /tmp/minidlna_rebuild ]];then
++		scan="-R"
++		rm -f /tmp/minidlna_rebuild
++	else
++		$MINIDLNAD -h|grep "\-r" >/dev/null && scan="-r"
++	fi
++        
++	service_start $MINIDLNAD $scan -f "$MINIDLNA_CONFIG_FILE"
+ }
+ 
+ stop() {

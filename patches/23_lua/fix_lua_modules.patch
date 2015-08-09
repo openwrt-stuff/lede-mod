@@ -1,0 +1,55 @@
+diff -Naur a/package/feeds/packages/luasec/Makefile b/package/feeds/packages/luasec/Makefile
+--- a/package/feeds/packages/luasec/Makefile	2016-09-23 13:16:27.000000000 +0800
++++ b/package/feeds/packages/luasec/Makefile	2016-09-23 13:25:45.000000000 +0800
+@@ -40,9 +40,18 @@
+ define Build/Configure
+ endef
+ 
++TARGET_CFLAGS+= -fPIC
++TARGET_CXXFLAGS+= -fPIC
++ifndef SSP_SUPPORT
++	TARGET_CFLAGS+= -fno-stack-protector
++	TARGET_CXXFLAGS+= -fno-stack-protector
++endif
++
+ MAKE_FLAGS += \
+-	INCDIR="$(TARGET_CPPFLAGS) -I." \
+-	LIBDIR="$(TARGET_LDFLAGS) -L./luasocket" \
++	CFLAGS="$(TARGET_CFLAGS) -I$(PKG_BUILD_DIR)/src" \
++	CXXFLAGS="$(TARGET_CXXFLAGS) -I$(PKG_BUILD_DIR)/src" \
++	INCDIR="$(TARGET_CPPFLAGS)" \
++	LIBDIR="$(TARGET_LDFLAGS) -L$(PKG_BUILD_DIR)/src/luasocket" \
+ 	LUACPATH="$(PKG_INSTALL_DIR)/usr/lib/lua" \
+ 	LUAPATH="$(PKG_INSTALL_DIR)/usr/lib/lua"
+ 
+diff -Naur a/package/feeds/packages/luasocket/Makefile b/package/feeds/packages/luasocket/Makefile
+--- a/package/feeds/packages/luasocket/Makefile	2016-09-23 13:16:34.000000000 +0800
++++ b/package/feeds/packages/luasocket/Makefile	2016-09-23 13:20:45.000000000 +0800
+@@ -38,10 +38,15 @@
+ define Build/Configure
+ endef
+ 
++C_CMD:=$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -std=gnu99 -fPIC
++ifndef SSP_SUPPORT
++	C_CMD+= -fno-stack-protector
++endif
++
+ define Build/Compile
+ 	$(MAKE) -C $(PKG_BUILD_DIR)/ \
+ 		LIBDIR="$(TARGET_LDFLAGS)" \
+-		CC="$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -std=gnu99" \
++		CC="$(C_CMD)" \
+ 		LD="$(TARGET_CROSS)ld -shared" \
+ 		all
+ endef
+diff -Naur a/package/feeds/packages/lua-xavante/Makefile b/package/feeds/packages/lua-xavante/Makefile
+--- a/package/feeds/packages/lua-xavante/Makefile	2016-10-05 21:25:20.000000000 +0800
++++ b/package/feeds/packages/lua-xavante/Makefile	2016-10-12 09:16:30.887045655 +0800
+@@ -53,6 +53,7 @@
+ 
+ 	$(INSTALL_DIR) $(1)/usr/lib/lua/xavante
+ 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/src/xavante/{cgiluahandler,encoding,filehandler,httpd,mime,patternhandler,redirecthandler,vhostshandler,indexhandler,urlhandler,ruleshandler}.lua $(1)/usr/lib/lua/xavante
++	$(INSTALL_DATA) $(PKG_BUILD_DIR)/src/webdav/{davFileProps,davFileRepository,davhandler}.lua $(1)/usr/lib/lua/xavante
+ endef
+ 
+ $(eval $(call BuildPackage,lua-xavante))

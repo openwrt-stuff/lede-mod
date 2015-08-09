@@ -1,2 +1,3 @@
-# openwrt-cc-wndr4300
-Openwrt build script that include some custom patches for netgear wndr4300
+# openwrt
+Script that applies some custom patches to openwrt/lede
+Please put the folder under the root of source tree

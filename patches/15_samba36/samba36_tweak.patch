@@ -1,0 +1,33 @@
+--- a/package/network/services/samba36/files/samba.init	2016-09-12 07:41:04.000000000 +0800
++++ b/package/network/services/samba36/files/samba.init	2016-09-20 17:12:41.430941385 +0800
+@@ -81,7 +81,7 @@
+ 	echo -e "\n[$name]\n\tpath = $path" >> /var/etc/smb.conf
+ 	[ -n "$users" ] && echo -e "\tvalid users = $users" >> /var/etc/smb.conf
+ 	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /var/etc/smb.conf
+-	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /var/etc/smb.conf
++	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok\n\tpublic = $guest_ok" >> /var/etc/smb.conf
+ 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /var/etc/smb.conf
+ 	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /var/etc/smb.conf
+ 	[ -n "$browseable" ] && echo -e "\tbrowseable = $browseable" >> /var/etc/smb.conf
+--- a/package/network/services/samba36/files/smb.conf.template	2016-09-12 07:41:04.000000000 +0800
++++ b/package/network/services/samba36/files/smb.conf.template	2016-09-20 17:11:51.313941759 +0800
+@@ -26,3 +26,19 @@
+ 	use sendfile = yes
+ 	writeable = yes
+ 	bind interfaces only = yes
++	
++	# Allow ntlmv2 only 
++	ntlm auth = No
++	lanman auth = No
++	
++	# Perfomance tweak
++	read size = 65536
++	read prediction = yes
++	socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072
++	write raw = yes
++	read raw = yes
++	aio read size = 16384
++	aio write size = 16384
++	write cache size = 262144
++	getwd cache = yes
++	large readwrite = yes

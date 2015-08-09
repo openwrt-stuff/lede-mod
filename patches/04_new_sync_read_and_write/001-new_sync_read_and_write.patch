@@ -1,0 +1,49 @@
+diff -Naur a/fs/read_write.c b/fs/read_write.c
+--- a/fs/read_write.c	2016-09-07 14:32:59.000000000 +0800
++++ b/fs/read_write.c	2016-09-16 21:39:42.496678669 +0800
+@@ -408,7 +408,7 @@
+ 	return count > MAX_RW_COUNT ? MAX_RW_COUNT : count;
+ }
+ 
+-static ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos)
++ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos)
+ {
+ 	struct iovec iov = { .iov_base = buf, .iov_len = len };
+ 	struct kiocb kiocb;
+@@ -424,6 +424,7 @@
+ 	*ppos = kiocb.ki_pos;
+ 	return ret;
+ }
++EXPORT_SYMBOL(new_sync_read);
+ 
+ ssize_t __vfs_read(struct file *file, char __user *buf, size_t count,
+ 		   loff_t *pos)
+@@ -464,7 +465,7 @@
+ 
+ EXPORT_SYMBOL(vfs_read);
+ 
+-static ssize_t new_sync_write(struct file *filp, const char __user *buf, size_t len, loff_t *ppos)
++ssize_t new_sync_write(struct file *filp, const char __user *buf, size_t len, loff_t *ppos)
+ {
+ 	struct iovec iov = { .iov_base = (void __user *)buf, .iov_len = len };
+ 	struct kiocb kiocb;
+@@ -481,6 +482,7 @@
+ 		*ppos = kiocb.ki_pos;
+ 	return ret;
+ }
++EXPORT_SYMBOL(new_sync_write);
+ 
+ ssize_t __vfs_write(struct file *file, const char __user *p, size_t count,
+ 		    loff_t *pos)
+diff -Naur a/include/linux/fs.h b/include/linux/fs.h
+--- a/include/linux/fs.h	2016-09-07 14:32:59.000000000 +0800
++++ b/include/linux/fs.h	2016-09-16 21:38:44.439206531 +0800
+@@ -1682,6 +1682,8 @@
+ 			      struct iovec *fast_pointer,
+ 			      struct iovec **ret_pointer);
+ 
++extern ssize_t new_sync_read(struct file *, char __user *, size_t, loff_t *);
++extern ssize_t new_sync_write(struct file *, const char __user *, size_t, loff_t *);
+ extern ssize_t __vfs_read(struct file *, char __user *, size_t, loff_t *);
+ extern ssize_t __vfs_write(struct file *, const char __user *, size_t, loff_t *);
+ extern ssize_t vfs_read(struct file *, char __user *, size_t, loff_t *);

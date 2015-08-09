@@ -1,0 +1,10 @@
+--- a/feeds/luci/applications/luci-app-p2pblock/root/etc/uci-defaults/40_luci-p2pblock	2015-06-29 09:32:26.000000000 +0200
++++ b/feeds/luci/applications/luci-app-p2pblock/root/etc/uci-defaults/40_luci-p2pblock	2015-07-04 14:45:43.000000000 +0200
+@@ -7,5 +7,7 @@
+ 	commit ucitrack
+ EOF
+ 
++/etc/init.d/freifunk-p2pblock enabled && ( /etc/init.d/freifunk-p2pblock stop ; /etc/init.d/freifunk-p2pblock disable )
++
+ rm -f /tmp/luci-indexcache
+ exit 0

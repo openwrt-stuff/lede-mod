@@ -1,0 +1,39 @@
+diff -Naur a/feeds/luci/modules/luci-base/Makefile b/feeds/luci/modules/luci-base/Makefile
+--- a/feeds/luci/modules/luci-base/Makefile	2016-09-12 07:41:57.000000000 +0800
++++ b/feeds/luci/modules/luci-base/Makefile	2016-09-23 17:51:24.554207707 +0800
+@@ -12,5 +12,5 @@
+ LUCI_BASENAME:=base
+ 
+ LUCI_TITLE:=LuCI core libraries
+-LUCI_DEPENDS:=+lua +libuci-lua +luci-lib-nixio +luci-lib-ip +rpcd +libubus-lua +luci-lib-jsonc
++LUCI_DEPENDS:=+lua +libuci-lua +luci-lib-nixio +luci-lib-ip +rpcd +libubus-lua +luci-lib-jsonc +uhttpd-mod-lua
+ 
+diff -Naur a/feeds/luci/modules/luci-base/root/www/index.html b/feeds/luci/modules/luci-base/root/www/index.html
+--- a/feeds/luci/modules/luci-base/root/www/index.html	2016-09-12 07:41:57.000000000 +0800
++++ b/feeds/luci/modules/luci-base/root/www/index.html	2016-09-23 17:54:16.010599717 +0800
+@@ -3,9 +3,9 @@
+ <html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+ <meta http-equiv="Cache-Control" content="no-cache" />
+-<meta http-equiv="refresh" content="0; URL=/cgi-bin/luci" />
++<meta http-equiv="refresh" content="0; URL=/luci" />
+ </head>
+ <body style="background-color: white">
+-<a style="color: black; font-family: arial, helvetica, sans-serif;" href="/cgi-bin/luci">LuCI - Lua Configuration Interface</a>
++<a style="color: black; font-family: arial, helvetica, sans-serif;" href="/luci">LuCI - Lua Configuration Interface</a>
+ </body>
+ </html>
+diff -Naur a/package/network/services/uhttpd/files/uhttpd.config b/package/network/services/uhttpd/files/uhttpd.config
+--- a/package/network/services/uhttpd/files/uhttpd.config	2016-09-12 07:41:04.000000000 +0800
++++ b/package/network/services/uhttpd/files/uhttpd.config	2016-09-23 17:52:32.806956456 +0800
+@@ -51,8 +51,8 @@
+ 
+ 	# Lua url prefix and handler script.
+ 	# Lua support is disabled if no prefix given.
+-#	option lua_prefix	/luci
+-#	option lua_handler	/usr/lib/lua/luci/sgi/uhttpd.lua
++	option lua_prefix	/luci
++	option lua_handler	/usr/lib/lua/luci/sgi/uhttpd.lua
+ 
+ 	# Specify the ubus-rpc prefix and socket path.
+ #	option ubus_prefix	/ubus

@@ -1,0 +1,12 @@
+diff -Naur d/configure.ac e/configure.ac
+--- d/configure.ac	2013-11-02 08:44:41.000000000 +0800
++++ e/configure.ac	2016-10-09 07:50:26.420262369 +0800
+@@ -12,7 +12,7 @@
+ 
+ AM_ICONV
+ AM_GNU_GETTEXT([external])
+-AM_GNU_GETTEXT_VERSION(0.18)
++AM_GNU_GETTEXT_VERSION(0.19)
+ 
+ # Checks for programs.
+ # AC_PROG_CXX

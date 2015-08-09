@@ -1,0 +1,98 @@
+diff -Naur openwrt_old/include/netfilter.mk openwrt/include/netfilter.mk
+--- openwrt_old/include/netfilter.mk	2015-06-05 11:11:34.329857543 +0800
++++ openwrt/include/netfilter.mk	2015-06-05 11:22:14.000000000 +0800
+@@ -101,9 +101,15 @@
+ # filter
+ 
+ $(eval $(call nf_add,IPT_FILTER,CONFIG_NETFILTER_XT_MATCH_STRING, $(P_XT)xt_string))
+ 
+ 
++# imq
++
++$(eval $(call nf_add,IPT_IMQ,CONFIG_IP_NF_TARGET_IMQ, $(P_V4)ipt_IMQ))
++$(eval $(call nf_add,IPT_IMQ,CONFIG_NETFILTER_XT_TARGET_IMQ, $(P_XT)xt_IMQ))
++
++
+ # ipopt
+ 
+ $(eval $(call nf_add,IPT_IPOPT,CONFIG_NETFILTER_XT_MATCH_DSCP, $(P_XT)xt_dscp))
+ $(eval $(call nf_add,IPT_IPOPT,CONFIG_NETFILTER_XT_TARGET_DSCP, $(P_XT)xt_DSCP))
+@@ -155,7 +162,7 @@
+ 
+ $(eval $(if $(NF_KMOD),,$(call nf_add,IPT_IPV6,CONFIG_IP6_NF_IPTABLES, ip6t_icmp6)))
+ 
+-
++$(eval $(call nf_add,IPT_IPV6,CONFIG_IP6_NF_TARGET_IMQ, $(P_V6)ip6t_IMQ))
+ $(eval $(call nf_add,IPT_IPV6,CONFIG_IP6_NF_TARGET_LOG, $(P_V6)ip6t_LOG))
+ $(eval $(call nf_add,IPT_IPV6,CONFIG_IP6_NF_TARGET_REJECT, $(P_V6)ip6t_REJECT))
+ $(eval $(call nf_add,IPT_IPV6,CONFIG_IP6_NF_TARGET_REJECT, $(P_V6)nf_reject_ipv6))
+@@ -350,6 +357,7 @@
+ IPT_BUILTIN += $(IPT_CONNTRACK_EXTRA-y)
+ IPT_BUILTIN += $(IPT_EXTRA-y)
+ IPT_BUILTIN += $(IPT_FILTER-y)
++IPT_BUILTIN += $(IPT_IMQ-y)
+ IPT_BUILTIN += $(IPT_IPOPT-y)
+ IPT_BUILTIN += $(IPT_IPRANGE-y)
+ IPT_BUILTIN += $(IPT_CLUSTER-y)
+diff -Naur openwrt_old/package/kernel/linux/modules/netfilter.mk openwrt/package/kernel/linux/modules/netfilter.mk
+--- openwrt_old/package/kernel/linux/modules/netfilter.mk	2015-06-05 11:11:34.477850880 +0800
++++ openwrt/package/kernel/linux/modules/netfilter.mk	2015-06-05 11:16:34.000000000 +0800
+@@ -368,6 +368,29 @@
+ 
+ $(eval $(call KernelPackage,nf-nathelper-extra))
+ 
++define KernelPackage/ipt-imq
++  TITLE:=Intermediate Queueing support
++  KCONFIG:= \
++	CONFIG_IMQ \
++	CONFIG_IMQ_BEHAVIOR_BA=y \
++	CONFIG_IMQ_NUM_DEVS=2 \
++	CONFIG_NETFILTER_XT_TARGET_IMQ
++  FILES:= \
++	$(LINUX_DIR)/drivers/net/imq.$(LINUX_KMOD_SUFFIX) \
++	$(foreach mod,$(IPT_IMQ-m),$(LINUX_DIR)/net/$(mod).$(LINUX_KMOD_SUFFIX))
++  AUTOLOAD:=$(call AutoLoad,46,$(notdir \
++	imq \
++	$(IPT_IMQ-m) \
++  ))
++  $(call AddDepends/ipt)
++endef
++
++define KernelPackage/ipt-imq/description
++ Kernel support for Intermediate Queueing devices
++endef
++
++$(eval $(call KernelPackage,ipt-imq))
++
+ 
+ define KernelPackage/ipt-ulog
+   TITLE:=Module for user-space packet logging
+diff -Naur openwrt_old/package/network/utils/iptables/Makefile openwrt/package/network/utils/iptables/Makefile
+--- openwrt_old/package/network/utils/iptables/Makefile	2015-06-05 11:11:34.361855905 +0800
++++ openwrt/package/network/utils/iptables/Makefile	2015-06-05 11:19:12.000000000 +0800
+@@ -123,6 +123,19 @@
+   - string
+ 
+ endef
++ 
++define Package/iptables-mod-imq
++$(call Package/iptables/Module, +kmod-ipt-imq)
++  TITLE:=IMQ support
++endef
++
++define Package/iptables-mod-imq/description
++iptables extension for IMQ support.
++
++ Targets:
++  - IMQ
++
++endef
+ 
+ define Package/iptables-mod-ipopt
+ $(call Package/iptables/Module, +kmod-ipt-ipopt)
+@@ -556,3 +569,5 @@
+ $(eval $(call BuildPackage,libip4tc))
+ $(eval $(call BuildPackage,libip6tc))
+ $(eval $(call BuildPackage,libxtables))
++$(eval $(call BuildPlugin,iptables-mod-imq,$(IPT_IMQ-m)))
++

@@ -1,0 +1,1246 @@
+diff -Naur minidlna-1.1.4/Makefile.am minidlna-PNG+user_icons/Makefile.am
+--- minidlna-1.1.4/Makefile.am	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/Makefile.am	2015-02-02 22:41:16.000000000 -0600
+@@ -15,13 +15,14 @@
+ # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ # USA.
+ 
+-AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@
++AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@ \
++	    @libpng_CFLAGS@
+ 
+ SUBDIRS=po
+ 
+ sbin_PROGRAMS = minidlnad
+ check_PROGRAMS = testupnpdescgen
+-minidlnad_SOURCES = minidlna.c upnphttp.c upnpdescgen.c upnpsoap.c \
++minidlnad_SOURCES = minidlna.c icons.c upnphttp.c upnpdescgen.c upnpsoap.c \
+ 			upnpreplyparse.c minixml.c clients.c \
+ 			getifaddr.c process.c upnpglobalvars.c \
+ 			options.c minissdp.c uuid.c upnpevents.c \
+@@ -40,6 +41,7 @@
+ 
+ minidlnad_LDADD = \
+ 	@LIBJPEG_LIBS@ \
++	@libpng_LIBS@ \
+ 	@LIBID3TAG_LIBS@ \
+ 	@LIBSQLITE3_LIBS@ \
+ 	@LIBAVFORMAT_LIBS@ \
+diff -Naur minidlna-1.1.4/configure.ac minidlna-PNG+user_icons/configure.ac
+--- minidlna-1.1.4/configure.ac	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/configure.ac	2015-02-02 22:41:16.000000000 -0600
+@@ -405,6 +405,11 @@
+ test x"$ac_cv_lib_jpeg_jpeg_set_defaults" = x"yes" || AC_MSG_ERROR([Could not find libexif])
+ AC_SUBST(LIBEXIF_LIBS)
+ 
++PKG_CHECK_MODULES([libpng], [libpng],
++		  AM_CONDITIONAL(HAVE_LIBPNG, true)
++		  AC_DEFINE(HAVE_LIBPNG,1,[Define to 1 if you have libpng]),
++		  AM_CONDITIONAL(HAVE_LIBPNG, false))
++
+ LDFLAGS_SAVE="$LDFLAGS"
+ for dir in "" /usr/local $SEARCH_DIR; do
+     if test -n "$dir"; then
+diff -Naur minidlna-1.1.4/icons.c minidlna-PNG+user_icons/icons.c
+--- minidlna-1.1.4/icons.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/icons.c	2015-02-02 22:41:16.000000000 -0600
+@@ -18,6 +18,8 @@
+  * along with MiniDLNA. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include "icons.h"
++
+ #ifdef NETGEAR
+ /* NG_Icon_48x48.png */
+ unsigned char
+@@ -2929,3 +2931,10 @@
+              "\x1e\x88\x20\xa8\xd8\xba\xe2\x7e\xdc\x26\x9a\x69\x08\xf7\x22\x22\x02\x82\x28\x82\x29\xe8\x88\x9e"
+              "\xda\x69\xa6\x90\x8f\xff\xd9";
+ #endif
++
++struct icon_struct icons = {
++	{ png_lrg, png_sm, jpeg_lrg, jpeg_sm },
++	{ sizeof (png_lrg)-1, sizeof (png_sm)-1,
++		sizeof (jpeg_lrg)-1, sizeof (jpeg_sm)-1 },
++	{ 0, 0, 0, 0 }
++};
+diff -Naur minidlna-1.1.4/icons.h minidlna-PNG+user_icons/icons.h
+--- minidlna-1.1.4/icons.h	1969-12-31 18:00:00.000000000 -0600
++++ minidlna-PNG+user_icons/icons.h	2015-02-02 22:41:16.000000000 -0600
+@@ -0,0 +1,24 @@
++#ifndef __ICONS_H__
++#define __ICONG_H__
++
++#define ICON_FIRST 0
++#define ICON_LAST 3
++#define ICON_PNG_LRG 0
++#define ICON_PNG_SM 1
++#define ICON_JPEG_LRG 2
++#define ICON_JPEG_SM 3
++
++struct icon_struct {
++    unsigned char *icon[4];
++    int size[4];
++    int dynamic[4];
++};
++
++extern unsigned char png_sm[];
++extern unsigned char png_lrg[];
++extern unsigned char jpeg_sm[];
++extern unsigned char jpeg_lrg[];
++
++extern struct icon_struct icons;
++
++#endif
+diff -Naur minidlna-1.1.4/image_utils.c minidlna-PNG+user_icons/image_utils.c
+--- minidlna-1.1.4/image_utils.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/image_utils.c	2015-02-02 22:41:16.000000000 -0600
+@@ -31,7 +31,14 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++
++/* phg.h brings in setjmp.h; you can't include both */
++#ifdef HAVE_LIBPNG
++#include <png.h>
++#else
+ #include <setjmp.h>
++#endif
++
+ #include <jpeglib.h>
+ #ifdef HAVE_MACHINE_ENDIAN_H
+ #include <machine/endian.h>
+@@ -562,6 +569,358 @@
+ 	return vimage;
+ }
+ 
++#ifdef HAVE_LIBPNG
++static void
++_png_read_data (png_structp png_ptr, png_bytep data, png_size_t length)
++{
++	struct _iu_png_io_struct *iu_png_io = png_get_io_ptr (png_ptr);
++	if (iu_png_io->fp)
++	{
++		if ((fread (data, 1, length, iu_png_io->fp)) < length)
++		{
++			if (ferror (iu_png_io->fp))
++				png_error (png_ptr, "file read error");
++		}
++	}
++	else
++	{
++		size_t bytes = (length < iu_png_io->count) ?
++			length : iu_png_io->count;
++		if (((iu_png_io->count) <= 0) && (length > 0))
++			png_error (png_ptr, "read buffer empty");
++		memcpy (data, iu_png_io->bufp, bytes);
++		iu_png_io->bufp += bytes;
++		iu_png_io->count -= bytes;
++	}
++}
++
++image_s *
++image_new_from_png(const char *path, int is_file, const uint8_t *buf, int size, int scale, int rotate, int *alpha)
++{
++	image_s *vimage = NULL;
++	FILE  *file = NULL;
++	struct _iu_png_io_struct iu_png_io;
++	int x, y, w, h;
++
++	png_bytepp row_pointers;
++	uint32_t *ptr;
++	png_uint_32 width, height;
++	int bit_depth, color_type, interlace_type, compression_type, filter_method;
++
++	png_structp png_ptr;
++	png_infop info_ptr, end_ptr;
++
++	/* sanity check */
++	if (scale <= 0)
++		scale = 1;
++
++	if( is_file )
++	{
++		if( (file = fopen(path, "rb")) == NULL )
++		{
++			return NULL;
++		}
++		iu_png_io.fp = file;
++		iu_png_io.buf = NULL;
++		iu_png_io.count = 0;
++	}
++	else
++	{
++		iu_png_io.fp = NULL;
++		iu_png_io.buf = iu_png_io.bufp = buf;
++		iu_png_io.count = size;
++	}
++
++
++	png_ptr = png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL,NULL,NULL);
++	if (!png_ptr)
++	{
++		if (is_file)
++			fclose (file);
++		return NULL;
++	}
++
++	info_ptr = png_create_info_struct (png_ptr);
++	if (!info_ptr)
++	{
++		png_destroy_read_struct (&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
++		if (is_file)
++			fclose (file);
++		return NULL;
++	}
++	end_ptr = png_create_info_struct (png_ptr);
++	if (!end_ptr)
++	{
++		png_destroy_read_struct (&png_ptr, &info_ptr, (png_infopp)NULL);
++		if (is_file)
++			fclose (file);
++		return NULL;
++	}
++
++	if (setjmp (png_jmpbuf (png_ptr)))
++	{
++		png_destroy_read_struct(&png_ptr, &info_ptr, &end_ptr);
++		if (is_file)
++			fclose (file);
++		if (vimage)
++			image_free (vimage);
++		return NULL;
++	}
++
++	png_set_read_fn (png_ptr, &iu_png_io, _png_read_data);
++
++	png_read_png (png_ptr, info_ptr,
++			PNG_TRANSFORM_STRIP_16|
++			PNG_TRANSFORM_PACKING|PNG_TRANSFORM_EXPAND,
++			NULL);
++
++	//png_read_update_info (png_ptr, info_ptr);
++	png_get_IHDR(png_ptr, info_ptr, &width, &height,
++			&bit_depth, &color_type, &interlace_type,
++			&compression_type, &filter_method);
++
++	w = width;
++	h = height;
++
++	DPRINTF (E_MAXDEBUG, L_METADATA,
++			"Read %s (%dx%dx%d)\n", path, (int)w, (int)h, (int)bit_depth);
++
++	row_pointers = png_get_rows (png_ptr, info_ptr);
++
++	if (alpha)
++		*alpha = (color_type & PNG_COLOR_MASK_ALPHA) != 0;
++
++	/* The use of "scale" doesn't make such a big difference, but it does
++	 * speed up the eventual resize and makes this memory pig a little
++	 * lighter */
++	vimage = image_new(w/scale, h/scale);
++	if(!vimage)
++	{
++		png_destroy_read_struct(&png_ptr, &info_ptr, &end_ptr);
++		if( is_file )
++			fclose(file);
++		return NULL;
++	}
++
++	ptr = vimage->buf;
++
++	if ((color_type == PNG_COLOR_TYPE_GRAY) || 
++		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA))
++	{
++		for (y = 0; y < h; y++) {
++			png_bytep p = row_pointers[y];
++			for (x = 0; x < w; x++)
++			{
++				if (color_type & PNG_COLOR_MASK_ALPHA)
++				{
++					*(ptr++) = COL_FULL (*p, *p, *p, *(p+1));
++					p += scale*2;
++				}
++				else
++				{
++					*(ptr++) = COL (*p, *p, *p);
++					p += scale;
++				}
++			}
++		}
++	}
++	else if ((color_type == PNG_COLOR_TYPE_RGB) ||
++			 (color_type == PNG_COLOR_TYPE_RGBA))
++	{
++		for (y = 0; y < h; y += scale) {
++			png_bytep p = row_pointers[y];
++			for (x = 0; x < w; x += scale)
++			{
++				if (color_type & PNG_COLOR_MASK_ALPHA)
++				{
++					*(ptr++) = COL_FULL (*p, *(p+1), *(p+2), *(p+3));
++					p += scale*4;
++				}
++				else
++				{
++					*(ptr++) = COL (*p, *(p+1), *(p+2));
++					p += scale*3;
++				}
++			}
++		}
++	}
++	else
++	{
++		DPRINTF (E_MAXDEBUG, L_METADATA,
++				"%s: Unexpected color type encountered\n", path);
++		image_free (vimage);
++		vimage = NULL;
++	}
++
++	png_destroy_read_struct(&png_ptr, &info_ptr, &end_ptr);
++	if( is_file )
++		fclose(file);
++	return vimage;
++}
++
++static void
++_png_write_data (png_structp png_ptr, png_bytep data, png_size_t length)
++{
++	struct _iu_png_io_struct *iu_png_io = png_get_io_ptr (png_ptr);
++	if (iu_png_io->fp)
++	{
++		if ((fwrite (data, 1, length, iu_png_io->fp)) < length)
++			png_error (png_ptr, "file write error");
++	}
++	else
++	{
++		png_bytep scratch;
++		scratch = realloc (iu_png_io->buf, iu_png_io->count+length);
++		if (!scratch)
++			png_error (png_ptr, "memory allocation error");
++		iu_png_io->buf = scratch;
++		memcpy (iu_png_io->buf + iu_png_io->count, data, length);
++		iu_png_io->count += length;
++	}
++}
++
++static void
++_png_flush_data (png_structp png_ptr)
++{
++	struct _iu_png_io_struct *iu_png_io = png_get_io_ptr (png_ptr);
++	if (iu_png_io->fp)
++	{
++		if ((fflush (iu_png_io->fp)) == EOF)
++			png_error (png_ptr, "flush error");
++	}
++}
++
++size_t
++image_save_to_png (const image_s *img, char *path,
++		uint8_t **buf, int alpha, int compression)
++{
++	int is_file = (path != (char *)NULL);
++	FILE *file = NULL;
++	uint32_t *ibp;
++	png_bytep p, png_imgbuf;
++	struct _iu_png_io_struct iu_png_io;
++	png_structp png_ptr;
++	png_infop info_ptr;
++	png_bytepp row_pointers;
++
++	int x,y;
++
++	png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING,
++			NULL, NULL, NULL);
++
++	if (!png_ptr)
++		return -1;
++
++	info_ptr = png_create_info_struct (png_ptr);
++	if (!info_ptr)
++	{
++		png_destroy_write_struct (&png_ptr, (png_infopp)NULL);
++		return -1;
++	}
++
++	if (is_file)
++	{
++		file = fopen (path, "wb");
++		if (file == (FILE *)NULL)
++		{
++			png_destroy_write_struct (&png_ptr, &info_ptr);
++			return -1;
++		}
++		iu_png_io.fp = file;
++	}
++	else
++	{
++		iu_png_io.fp = NULL;
++		iu_png_io.buf = NULL;
++		iu_png_io.count = 0;
++	}
++
++	if (setjmp (png_jmpbuf (png_ptr)))
++	{
++		png_destroy_write_struct (&png_ptr, &info_ptr);
++		if (is_file)
++			fclose (file);
++		return -1;
++	}
++
++	png_set_filter (png_ptr, 0, PNG_FILTER_NONE);
++	png_set_IHDR (png_ptr, info_ptr, img->width, img->height, 8,
++			alpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB,
++			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
++			PNG_FILTER_TYPE_DEFAULT);
++
++	if ((compression >= 0) && (compression <= 9))
++	    png_set_compression_level (png_ptr, compression);
++
++	row_pointers = malloc (img->height * sizeof (png_bytep));
++	png_imgbuf = malloc (img->height * img->width * (alpha ? 4:3));
++
++	p = png_imgbuf;
++	ibp = img->buf;
++
++	for (y = 0; y < img->height; y++)
++	{
++		row_pointers[y] = p;
++		for (x = 0; x < img->width; x++)
++		{
++			*(p++) = (*ibp >> 24) & 0xff;
++			*(p++) = (*ibp >> 16) & 0xff;
++			*(p++) = (*ibp >> 8) & 0xff;
++			if (alpha)
++				*(p++) = *ibp & 0xff;
++			++ibp;
++		}
++	}
++
++	png_set_rows (png_ptr, info_ptr, row_pointers);
++
++	png_set_write_fn (png_ptr, 
++			&iu_png_io,
++			_png_write_data, _png_flush_data);
++
++	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
++
++	if (is_file)
++	{
++		fclose (file);
++		return 0;
++	}
++
++	*buf = iu_png_io.buf;
++	return iu_png_io.count;
++}
++
++
++#endif	/* HAVE_LIBPNG */
++
++void
++image_bgcolor_composite (image_s *img, uint32_t bgcolor)
++{
++	int j;
++	uint32_t *p = img->buf;
++
++	double r,g,b,a, rbg,gbg,bbg;
++
++	rbg = (double)((bgcolor >> 16) & 0xff) / 255.0;
++	gbg = (double)((bgcolor >> 8) & 0xff) / 255.0;
++	bbg = (double)(bgcolor & 0xff) / 255.0;
++
++	for (j = 0; j < (img->height * img->width); j++)
++	{
++		uint8_t br,bg,bb;
++		r = (double)(*p >> 24) / 255.0;
++		g = (double)((*p >> 16) & 0xff) / 255.0;
++		b = (double)((*p >> 8) & 0xff) / 255.0;
++		a = (double)(*p & 0xff) / 255.0;
++
++		br = (r * a + rbg*(1 - a)) * 255;
++		bg = (g * a + gbg*(1 - a)) * 255;
++		bb = (b * a + bbg*(1 - a)) * 255;
++
++		*(p++) = COL (br,bg,bb);
++	}
++}
++
+ void
+ image_upsize(image_s * pdest, image_s * psrc, int32_t width, int32_t height)
+ {
+diff -Naur minidlna-1.1.4/image_utils.h minidlna-PNG+user_icons/image_utils.h
+--- minidlna-1.1.4/image_utils.h	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/image_utils.h	2015-02-02 22:41:16.000000000 -0600
+@@ -28,6 +28,11 @@
+ #define ROTATE_180  0x2
+ #define ROTATE_270  0x4
+ 
++#ifdef HAVE_LIBPNG
++/* background color for images w/transparency */
++#define BGCOLOR 0x7f7f7f
++#endif
++
+ typedef uint32_t pix;
+ 
+ typedef struct {
+@@ -46,7 +51,22 @@
+ image_get_jpeg_resolution(const char * path, int * width, int * height);
+ 
+ image_s *
+-image_new_from_jpeg(const char *path, int is_file, const uint8_t *ptr, int size, int scale, int resize);
++image_new_from_jpeg(const char *path, int is_file, const uint8_t *ptr, int size, int scale, int rotate);
++
++#ifdef HAVE_LIBPNG
++image_s *
++image_new_from_png(const char *path, int is_file, const uint8_t *ptr, int size, int scale, int rotate, int *alpha);
++
++size_t
++image_save_to_png (const image_s *img, char *path,
++		uint8_t **buf, int alpha, int compression);
++
++struct _iu_png_io_struct {
++    FILE *fp;
++    uint8_t *buf, *bufp;
++    size_t count;
++};
++#endif
+ 
+ image_s *
+ image_resize(image_s * src_image, int32_t width, int32_t height);
+@@ -56,3 +76,7 @@
+ 
+ char *
+ image_save_to_jpeg_file(image_s * pimage, char * path);
++
++void
++image_bgcolor_composite (image_s *img, uint32_t bgcolor);
++
+diff -Naur minidlna-1.1.4/metadata.c minidlna-PNG+user_icons/metadata.c
+--- minidlna-1.1.4/metadata.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/metadata.c	2015-02-02 22:41:16.000000000 -0600
+@@ -482,8 +482,8 @@
+ 	return;
+ }
+ 
+-int64_t
+-GetImageMetadata(const char *path, char *name)
++static int64_t
++_get_jpeg_metadata(const char *path, char *name)
+ {
+ 	ExifData *ed;
+ 	ExifEntry *e = NULL;
+@@ -651,6 +651,294 @@
+ 	return ret;
+ }
+ 
++#define BE32(b) (*(b)<<24) | (*((b)+1)<<16) | (*((b)+2)<<8) | *((b)+3)
++
++static uint8_t *
++_png_readchunk (FILE *file, size_t size)
++{
++	uint8_t *buf = malloc (size);
++
++	if (buf == (uint8_t *)NULL)
++		return NULL;
++
++	if (fread (buf, 1, size, file) != size)
++	{
++		free (buf);
++		return NULL;
++	}
++	/* seek past the checksum */
++	if (fseek (file, 4, SEEK_CUR))
++	{
++		free (buf);
++		return NULL;
++	}
++	return buf;
++}
++
++static int64_t
++_get_png_metadata (const char *path, char *name)
++{
++	FILE *file;
++	uint32_t width=0, height=0;
++	int thumb=0;
++	int got_header = 0;
++	struct stat statbuf;
++	int64_t ret;
++	metadata_t m;
++	memset(&m, '\0', sizeof(metadata_t));
++	uint8_t tagbuf[8];
++	uint32_t free_flags = 0xFFFFFFFF;
++
++	if ( stat(path, &statbuf) != 0 )
++		return 0;
++	strip_ext(name);
++
++	if ((file = fopen (path, "rb")) == (FILE *)NULL)
++	{
++		DPRINTF (E_ERROR, L_METADATA, "Error opening \"%s\": %s\n",
++				path, strerror (errno));
++		return 0;
++	}
++
++	if (fread (tagbuf, 1, 8, file) != 8)
++	{
++		fclose (file);
++		return 0;
++	}
++
++	if (memcmp (tagbuf, "\x89PNG\x0d\x0a\x1a\x0a", 8))
++	{
++		DPRINTF (E_WARN, L_METADATA,
++				"\"%s\" not a PNG file.\n", path);
++		fclose (file);
++		return 0;
++	}
++
++	/* Go through the chunks */
++
++	for (;;)
++	{
++		int32_t chunksize;
++		char *chunkname[5];
++		uint8_t *buf;
++
++		if ((fread (tagbuf, 1, 8, file)) != 8)
++		{
++			DPRINTF (E_WARN, L_METADATA,
++					"%s: Premature EOF.\n", path);
++			fclose (file);
++			free_metadata(&m, free_flags);
++			return 0;
++		}
++		chunksize = BE32 (&tagbuf[0]);
++		memcpy (chunkname, &tagbuf[4], 4);
++		chunkname[4] = '\x00';
++
++		if (!memcmp (&tagbuf[4], "IEND", 4))
++		{
++			break;
++		}
++		else if (chunksize <= 0)
++		{
++			if (fseek (file, 4, SEEK_CUR))
++			{
++				DPRINTF (E_WARN, L_METADATA,
++						"%s: Seek error.\n", path);
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++			continue;
++		}
++		else if (!memcmp (&tagbuf[4], "IHDR", 4)) {
++			if ((buf = _png_readchunk (file, chunksize)) == NULL)
++			{
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++			got_header = 1;
++
++			/* width and height are 32-bit BE starting at offset 0 */
++			width = BE32 (&buf[0]);
++			height = BE32 (&buf[4]);
++			free (buf);
++			continue;
++		}
++		else if (!memcmp (&tagbuf[4], "tIME", 4))
++		{
++			if ((buf = _png_readchunk (file, chunksize)) == NULL)
++			{
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++			if (m.date)
++				free (m.date);
++
++			xasprintf (&m.date, "%04d-%02d-%02dT%02d:%02d:%02d",
++					(int)(buf[0]<<8 | buf[1]),
++					(int)buf[2], (int)buf[3],
++					(int)buf[4], (int)buf[5], (int)buf[6]);
++			free (buf);
++			continue;
++		}
++		else if (!memcmp (&tagbuf[4], "tEXt", 4) || 
++				!memcmp (&tagbuf[4], "iTXt", 4))
++		{
++			int international = !memcmp (&tagbuf[4], "iTXt", 4),
++					remaining = chunksize;
++			char *keyword, *value;
++			uint8_t *textp;
++			int l;
++
++			if ((buf = _png_readchunk (file, chunksize)) == NULL)
++			{
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++
++			textp = buf;
++			keyword = (char *)buf;
++			l = strlen (keyword) + 1;
++			textp += l;
++			if ((remaining -= l) <= 0)
++				goto textdone;
++
++			if (international)
++			{
++				char *lang;
++
++				if (*textp)
++					/* compressed */
++					goto textdone;
++
++				textp += 2;
++				if ((remaining -= 2) <= 0)
++					goto textdone;
++
++				/* language */
++				lang = (char *)textp;
++				l = strlen (lang) + 1;
++				textp += l;
++				if ((remaining -= l) <= 0)
++					goto textdone;
++
++				/* translated keyword */
++				l = strlen ((char *)textp) + 1;
++				textp += l;
++				if ((remaining -= l) <= 0)
++					goto textdone;
++			}
++
++			/* whatever's left is the value */
++			if ((value = malloc (remaining + 1)) == (char *)NULL)
++			{
++				DPRINTF (E_ERROR, L_METADATA, "Allocation error.\n");
++				free (buf);
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++
++			memcpy (value, textp, remaining);
++			value[remaining] = '\0';
++
++			if (!strcmp (keyword, "Title"))
++			{
++				if (m.title)
++					free (m.title);
++				m.title = value;
++			}
++			else if (!strcmp (keyword, "Author"))
++			{
++				if (m.creator)
++					free (m.creator);
++				m.creator = value;
++			}
++			else
++			{
++				free (value);
++			}
++
++textdone:
++			free (buf);
++		}
++		else
++		{
++			/* move on to the next chunk */
++			if (fseek (file, chunksize+4, SEEK_CUR))
++			{
++				DPRINTF (E_WARN, L_METADATA,
++						"%s: Seek error.\n", path);
++				fclose (file);
++				free_metadata(&m, free_flags);
++				return 0;
++			}
++		}
++	}
++	fclose (file);
++
++	if (!got_header)
++	{
++		DPRINTF (E_WARN, L_METADATA,
++				"%s: No PNG header.\n", path);
++		free_metadata (&m, free_flags);
++		return 0;
++	}
++
++	xasprintf(&m.resolution, "%dx%d", (int)width, (int)height);
++	m.rotation = 0;
++	thumb = 0;
++	m.dlna_pn = NULL;
++	m.mime = strdup("image/png");
++
++	if (!m.title)
++		m.title = strdup (name);
++
++	DPRINTF (E_MAXDEBUG, L_METADATA,
++			"Processed \"%s\":\n  Name: %s\n  Resolution: %s\n",
++			path, name, m.resolution);
++
++	ret = sql_exec(db, "INSERT into DETAILS"
++	                   " (PATH, TITLE, SIZE, TIMESTAMP, DATE, RESOLUTION,"
++	                    " ROTATION, THUMBNAIL, CREATOR, DLNA_PN, MIME) "
++	                   "VALUES"
++	                   " (%Q, '%q', %lld, %lld, %Q, %Q, %u, %d, %Q, %Q, %Q);",
++	                   path, m.title, (long long)statbuf.st_size,
++					   (long long)statbuf.st_mtime, m.date, m.resolution,
++					   m.rotation, thumb, m.creator, m.dlna_pn, m.mime);
++	if( ret != SQLITE_OK )
++	{
++		DPRINTF(E_ERROR, L_METADATA, "Error inserting details for '%s'!\n", path);
++		ret = 0;
++	}
++	else
++	{
++		ret = sqlite3_last_insert_rowid(db);
++	}
++	free_metadata(&m, FLAG_MIME | FLAG_RESOLUTION);
++
++	return ret;
++}
++
++
++int64_t
++GetImageMetadata(const char *path, char *name)
++{
++	if (ends_with (path, ".jpg") || ends_with (path, ".jpeg"))
++	{
++		return _get_jpeg_metadata (path, name);
++	}
++	else if (ends_with (path, ".png"))
++	{
++		return _get_png_metadata (path, name);
++	}
++	else
++		return 0;
++}
++
+ int64_t
+ GetVideoMetadata(const char *path, char *name)
+ {
+diff -Naur minidlna-1.1.4/minidlna.c minidlna-PNG+user_icons/minidlna.c
+--- minidlna-1.1.4/minidlna.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/minidlna.c	2015-02-02 22:41:16.000000000 -0600
+@@ -94,6 +94,8 @@
+ #include "log.h"
+ #include "tivo_beacon.h"
+ #include "tivo_utils.h"
++#include "icons.h"
++#include "image_utils.h"
+ 
+ #if SQLITE_VERSION_NUMBER < 3005001
+ # warning "Your SQLite3 library appears to be too old!  Please use 3.5.1 or newer."
+@@ -278,6 +280,166 @@
+ #endif
+ }
+ 
++#define DESTROY_ICON(s,i) \
++	if (s->dynamic[i]) free (s->icon[i])
++
++static void
++destroy_icons (struct icon_struct *s)
++{
++	int j;
++	for (j = ICON_FIRST; j <= ICON_LAST; j++)
++		DESTROY_ICON (s,j);
++}
++
++static void
++set_user_icon (int i, char *path)
++{
++	struct stat statbuf;
++	FILE *file;
++	unsigned char *buf;
++
++	if (stat (path, &statbuf)) {
++		DPRINTF (E_WARN, L_GENERAL, "Can't stat \"%s\".\n", path);
++		return;
++	}
++
++	if ((file = fopen (path, "rb")) == (FILE *)NULL)
++	{
++		DPRINTF (E_WARN, L_GENERAL, "Can't open \"%s\".\n", path);
++		return;
++	}
++
++	if ((buf = malloc (statbuf.st_size)) == (unsigned char *)NULL)
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Allocation error: %s\n", strerror (errno));
++		return;
++	}
++
++	if ((fread (buf, statbuf.st_size, 1, file)) != 1)
++	{
++		free (buf);
++		DPRINTF (E_WARN, L_GENERAL, "Can't read \"%s\".\n", path);
++		return;
++	}
++
++	fclose (file);
++	DESTROY_ICON ((&icons), i);
++	icons.icon[i] = buf;
++	icons.size[i] = statbuf.st_size;
++	icons.dynamic[i] = 1;
++}
++
++#ifdef HAVE_LIBPNG
++static int
++xround (double n)
++{
++	int i = n;
++	n -= i;
++	if ((n > 0.5) || ((n == 0.5) && (i & 0x1)))
++		++i;
++	return i;
++}
++
++static void
++set_user_icon_from_png (char *path, uint32_t bgcolor)
++{
++	int j, alpha;
++	image_s *img = image_new_from_png (path, 1, NULL, 0, 1, 0, &alpha);
++	image_s *img_sm, *img_lrg;
++	struct icon_struct newicons;
++	double n, scale_lrg, scale_sm;
++
++	if (img == (image_s *)NULL)
++	{
++		DPRINTF (E_WARN, L_GENERAL,
++				"Unable to load icon file \"%s\".\n", path);
++		return;
++	}
++
++	n = (img->height > img->width) ? img->height : img->width;
++	scale_lrg = 120.0 / n;
++	scale_sm = 48.0 / n;
++
++	if ((img_lrg = image_resize (img,
++					xround (img->width*scale_lrg),
++					xround(img->height*scale_lrg))) == (image_s *)NULL)
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to rescale large icon image (%s).\n", path);
++		image_free (img);
++		return;
++	}
++
++	if ((img_sm = image_resize (img,
++					xround(img->width*scale_sm),
++					xround(img->height*scale_sm))) == (image_s *)NULL)
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to rescale small icon image (%s).\n", path);
++		image_free (img);
++		image_free (img_lrg);
++		return;
++	}
++
++	image_free (img);
++
++	for (j = ICON_FIRST; j <= ICON_LAST; j++)
++		newicons.dynamic[j] = 1;
++
++	if ((newicons.size[ICON_PNG_LRG] = image_save_to_png (img_lrg, NULL,
++			&newicons.icon[ICON_PNG_LRG], alpha, 9)) < 0)
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to create large PNG icon (%s).\n", path);
++		newicons.icon[ICON_PNG_LRG] = icons.icon[ICON_PNG_LRG];
++		newicons.size[ICON_PNG_LRG] = icons.size[ICON_PNG_LRG];
++		newicons.dynamic[ICON_PNG_LRG] = icons.dynamic[ICON_PNG_LRG];
++	}
++
++	if ((newicons.size[ICON_PNG_SM] = image_save_to_png (img_sm, NULL,
++			&newicons.icon[ICON_PNG_SM], alpha, 9)) < 0)
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to create small PNG icon (%s).\n", path);
++		newicons.icon[ICON_PNG_SM] = icons.icon[ICON_PNG_SM];
++		newicons.size[ICON_PNG_SM] = icons.size[ICON_PNG_SM];
++		newicons.dynamic[ICON_PNG_SM] = icons.dynamic[ICON_PNG_SM];
++	}
++
++	if (alpha)
++	{
++		image_bgcolor_composite (img_lrg, bgcolor);
++		image_bgcolor_composite (img_sm, bgcolor);
++	}
++
++	if (!(newicons.icon[ICON_JPEG_LRG] = image_save_to_jpeg_buf (img_lrg,
++			&newicons.size[ICON_JPEG_LRG])))
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to create large JPEG icon (%s).\n", path);
++		newicons.icon[ICON_JPEG_LRG] = icons.icon[ICON_JPEG_LRG];
++		newicons.size[ICON_JPEG_LRG] = icons.size[ICON_JPEG_LRG];
++		newicons.dynamic[ICON_JPEG_LRG] = icons.dynamic[ICON_JPEG_LRG];
++	}
++
++	if (!(newicons.icon[ICON_JPEG_SM] = image_save_to_jpeg_buf (img_sm,
++			&newicons.size[ICON_JPEG_SM])))
++	{
++		DPRINTF (E_ERROR, L_GENERAL,
++				"Failed to create small JPEG icon (%s).\n", path);
++		newicons.icon[ICON_JPEG_SM] = icons.icon[ICON_JPEG_SM];
++		newicons.size[ICON_JPEG_SM] = icons.size[ICON_JPEG_SM];
++		newicons.dynamic[ICON_JPEG_SM] = icons.dynamic[ICON_JPEG_SM];
++	}
++
++	image_free (img_sm);
++	image_free (img_lrg);
++	destroy_icons (&icons);
++	icons = newicons;
++}
++#endif	/* HAVE_LIBPNG */
++
+ static int
+ open_db(sqlite3 **sq3)
+ {
+@@ -734,6 +896,34 @@
+ 			if (strtobool(ary_options[i].value))
+ 				SETFLAG(MERGE_MEDIA_DIRS_MASK);
+ 			break;
++		case PNG_ICON_SM:
++			set_user_icon (ICON_PNG_SM, ary_options[i].value);
++			break;
++		case PNG_ICON_LRG:
++			set_user_icon (ICON_PNG_LRG, ary_options[i].value);
++			break;
++		case JPEG_ICON_SM:
++			set_user_icon (ICON_JPEG_SM, ary_options[i].value);
++			break;
++		case JPEG_ICON_LRG:
++			set_user_icon (ICON_JPEG_LRG, ary_options[i].value);
++			break;
++#ifdef HAVE_LIBPNG
++		case ICON:
++			{
++				char *path = strtok (ary_options[i].value, ",");
++				char *bgcolor_s = strtok (NULL, ",");
++				uint32_t bgcolor;
++
++				if (bgcolor_s)
++					bgcolor = strtol (bgcolor_s, NULL, 0) & 0xffffff;
++				else
++					bgcolor = 0x7f7f7f;
++
++				set_user_icon_from_png (path, bgcolor);
++			}
++			break;
++#endif
+ 		default:
+ 			DPRINTF(E_ERROR, L_GENERAL, "Unknown option in file %s\n",
+ 				optionsfile);
+diff -Naur minidlna-1.1.4/options.c minidlna-PNG+user_icons/options.c
+--- minidlna-1.1.4/options.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/options.c	2015-02-02 22:41:16.000000000 -0600
+@@ -64,7 +64,14 @@
+ 	{ USER_ACCOUNT, "user" },
+ 	{ FORCE_SORT_CRITERIA, "force_sort_criteria" },
+ 	{ MAX_CONNECTIONS, "max_connections" },
+-	{ MERGE_MEDIA_DIRS, "merge_media_dirs" }
++	{ MERGE_MEDIA_DIRS, "merge_media_dirs" },
++#ifdef HAVE_LIBPNG
++	{ ICON, "icon" },
++#endif
++	{ PNG_ICON_SM, "png_icon_sm" },
++	{ PNG_ICON_LRG, "png_icon_lrg" },
++	{ JPEG_ICON_SM, "jpeg_icon_sm" },
++	{ JPEG_ICON_LRG, "jpeg_icon_lrg" }
+ };
+ 
+ int
+diff -Naur minidlna-1.1.4/options.h minidlna-PNG+user_icons/options.h
+--- minidlna-1.1.4/options.h	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/options.h	2015-02-02 22:41:16.000000000 -0600
+@@ -57,7 +57,15 @@
+ 	USER_ACCOUNT,			/* user account to run as */
+ 	FORCE_SORT_CRITERIA,		/* force sorting by a given sort criteria */
+ 	MAX_CONNECTIONS,		/* maximum number of simultaneous connections */
+-	MERGE_MEDIA_DIRS		/* don't add an extra directory level when there are multiple media dirs */
++	MERGE_MEDIA_DIRS,		/* don't add an extra directory level when there are multiple media dirs */
++	/* user-supplied icons */
++	PNG_ICON_SM,
++	PNG_ICON_LRG,
++	JPEG_ICON_SM,
++	JPEG_ICON_LRG
++#ifdef HAVE_LIBPNG
++	,ICON					/* user-supplied PNG icon */
++#endif
+ };
+ 
+ /* readoptionsfile()
+diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
+--- minidlna-1.1.4/upnphttp.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/upnphttp.c	2015-02-02 22:41:16.000000000 -0600
+@@ -81,14 +81,13 @@
+ #include "clients.h"
+ #include "process.h"
+ #include "sendfile.h"
++#include "icons.h"
+ 
+ #define MAX_BUFFER_SIZE 2147483647
+ #define MIN_BUFFER_SIZE 65536
+ 
+ #define INIT_STR(s, d) { s.data = d; s.size = sizeof(d); s.off = 0; }
+ 
+-#include "icons.c"
+-
+ enum event_type {
+ 	E_INVALID,
+ 	E_SUBSCRIBE,
+@@ -1340,29 +1339,29 @@
+ 	if( strcmp(icon, "sm.png") == 0 )
+ 	{
+ 		DPRINTF(E_DEBUG, L_HTTP, "Sending small PNG icon\n");
+-		data = (char *)png_sm;
+-		size = sizeof(png_sm)-1;
++		data = (char *)icons.icon[ICON_PNG_SM];
++		size = icons.size[ICON_PNG_SM];
+ 		strcpy(mime+6, "png");
+ 	}
+ 	else if( strcmp(icon, "lrg.png") == 0 )
+ 	{
+ 		DPRINTF(E_DEBUG, L_HTTP, "Sending large PNG icon\n");
+-		data = (char *)png_lrg;
+-		size = sizeof(png_lrg)-1;
++		data = (char *)icons.icon[ICON_PNG_LRG];
++		size = icons.size[ICON_PNG_LRG];
+ 		strcpy(mime+6, "png");
+ 	}
+ 	else if( strcmp(icon, "sm.jpg") == 0 )
+ 	{
+ 		DPRINTF(E_DEBUG, L_HTTP, "Sending small JPEG icon\n");
+-		data = (char *)jpeg_sm;
+-		size = sizeof(jpeg_sm)-1;
++		data = (char *)icons.icon[ICON_JPEG_SM];
++		size = icons.size[ICON_JPEG_SM];
+ 		strcpy(mime+6, "jpeg");
+ 	}
+ 	else if( strcmp(icon, "lrg.jpg") == 0 )
+ 	{
+ 		DPRINTF(E_DEBUG, L_HTTP, "Sending large JPEG icon\n");
+-		data = (char *)jpeg_lrg;
+-		size = sizeof(jpeg_lrg)-1;
++		data = (char *)icons.icon[ICON_JPEG_LRG];
++		size = icons.size[ICON_JPEG_LRG];
+ 		strcpy(mime+6, "jpeg");
+ 	}
+ 	else
+@@ -1576,8 +1575,10 @@
+ 	int scale = 1;
+ 	const char *tmode;
+ 
++	int png = 0, alpha;
++
+ 	id = strtoll(object, &saveptr, 10);
+-	snprintf(buf, sizeof(buf), "SELECT PATH, RESOLUTION, ROTATION from DETAILS where ID = '%lld'", (long long)id);
++	snprintf(buf, sizeof(buf), "SELECT PATH, RESOLUTION, ROTATION, MIME from DETAILS where ID = '%lld'", (long long)id);
+ 	ret = sql_get_table(db, buf, &result, &rows, NULL);
+ 	if( ret != SQLITE_OK )
+ 	{
+@@ -1586,9 +1587,9 @@
+ 	}
+ 	if( rows )
+ 	{
+-		file_path = result[3];
+-		resolution = result[4];
+-		rotate = result[5] ? atoi(result[5]) : 0;
++		file_path = result[4];
++		resolution = result[5];
++		rotate = result[6] ? atoi(result[6]) : 0;
+ 	}
+ 	if( !file_path || !resolution || (access(file_path, F_OK) != 0) )
+ 	{
+@@ -1598,6 +1599,20 @@
+ 		return;
+ 	}
+ 
++	png = (strncmp (result[7], "image/png", 9) == 0);
++
++#ifndef HAVE_LIBPNG
++	if (png)
++	{
++		DPRINTF(E_MAXDEBUG, L_HTTP,
++				"%s (%s): Not supported for PNG, responding ERROR 404\n",
++				object, file_path);
++		sqlite3_free_table(result);
++		Send404(h);
++		return;
++	}
++#endif
++
+ 	if( saveptr )
+ 		saveptr = strchr(saveptr, '?');
+ 	path = saveptr ? saveptr + 1 : object;
+@@ -1710,7 +1725,12 @@
+ 	if( strcmp(h->HttpVer, "HTTP/1.0") == 0 )
+ 	{
+ 		chunked = 0;
+-		imsrc = image_new_from_jpeg(file_path, 1, NULL, 0, scale, rotate);
++		imsrc =
++#ifdef HAVE_LIBPNG
++			png ? image_new_from_png(file_path, 1, NULL, 0, scale, rotate,
++					&alpha) :
++#endif
++			image_new_from_jpeg(file_path, 1, NULL, 0, scale, rotate);
+ 	}
+ 	else
+ 	{
+@@ -1728,6 +1748,10 @@
+ 		}
+ 
+ 		imdst = image_resize(imsrc, dstw, dsth);
++#ifdef HAVE_LIBPNG
++		if (png && alpha)
++			image_bgcolor_composite (imdst, BGCOLOR);
++#endif
+ 		data = image_save_to_jpeg_buf(imdst, &size);
+ 
+ 		strcatf(&str, "Content-Length: %d\r\n\r\n", size);
+@@ -1737,7 +1761,12 @@
+ 	{
+ 		if( chunked )
+ 		{
+-			imsrc = image_new_from_jpeg(file_path, 1, NULL, 0, scale, rotate);
++			imsrc =
++#ifdef HAVE_LIBPNG
++				png ? image_new_from_png(file_path, 1, NULL, 0, scale, rotate,
++						&alpha) :
++#endif
++				image_new_from_jpeg(file_path, 1, NULL, 0, scale, rotate);
+ 			if( !imsrc )
+ 			{
+ 				DPRINTF(E_WARN, L_HTTP, "Unable to open image %s!\n", file_path);
+@@ -1745,6 +1774,10 @@
+ 				goto resized_error;
+ 			}
+ 			imdst = image_resize(imsrc, dstw, dsth);
++#ifdef HAVE_LIBPNG
++			if (png && alpha)
++				image_bgcolor_composite (imdst, BGCOLOR);
++#endif
+ 			data = image_save_to_jpeg_buf(imdst, &size);
+ 
+ 			ret = sprintf(buf, "%x\r\n", size);
+diff -Naur minidlna-1.1.4/utils.c minidlna-PNG+user_icons/utils.c
+--- minidlna-1.1.4/utils.c	2014-08-26 16:09:22.000000000 -0500
++++ minidlna-PNG+user_icons/utils.c	2015-02-02 22:41:16.000000000 -0600
+@@ -402,7 +402,8 @@
+ int
+ is_image(const char * file)
+ {
+-	return (ends_with(file, ".jpg") || ends_with(file, ".jpeg"));
++	return (ends_with(file, ".jpg") || ends_with(file, ".jpeg") ||
++		ends_with(file, ".png"));
+ }
+ 
+ int

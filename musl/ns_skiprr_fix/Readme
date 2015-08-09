@@ -1,2 +1,0 @@
-If you want to compile ChinaDNS yourself, please compile with uclibc.
-Otherwise, you need to create a patch and place it to toolchain/musl/patches.

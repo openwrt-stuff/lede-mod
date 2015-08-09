@@ -1,0 +1,19 @@
+diff -Naur a/src/webdav/davhandler.lua b/src/webdav/davhandler.lua
+--- a/src/webdav/davhandler.lua	2013-09-24 21:45:56.000000000 +0800
++++ b/src/webdav/davhandler.lua	2016-10-12 09:34:11.583460267 +0800
+@@ -3,10 +3,14 @@
+ -- Author: Javier Guerra
+ -- Copyright (c) 2005 Javier Guerra
+ -----------------------------------------------------------------------------
+-require "lxp.lom"
+ require "socket.url"
+ local httpd = require "xavante.httpd"
+ 
++xavante = require "xavante"
++xavante.filehandler = require "xavante.filehandler"
++lxp = require "lxp"
++lxp.lom = require "lxp.lom"
++
+ local url = socket.url
+ 
+ -- returns a copy of the string without any

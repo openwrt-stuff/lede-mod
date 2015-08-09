@@ -1,0 +1,56 @@
+diff -Naur b/inotify.c c/inotify.c
+--- b/inotify.c	2013-11-02 08:44:41.000000000 +0800
++++ c/inotify.c	2016-10-09 07:21:38.914886365 +0800
+@@ -297,7 +297,7 @@
+ 	/* Is it cover art for another file? */
+ 	if( is_image(path) )
+ 		update_if_album_art(path);
+-	else if( ends_with(path, ".srt") )
++	else if( ends_with(path, ".srt") || ends_with(path, ".ssa") || ends_with(path, ".ass") )
+ 		check_for_captions(path, 0);
+ 
+ 	/* Check if we're supposed to be scanning for this file type in this directory */
+@@ -538,7 +538,7 @@
+ 	int64_t detailID;
+ 	int rows, playlist;
+ 
+-	if( ends_with(path, ".srt") )
++	if( ends_with(path, ".srt") || ends_with(path, ".ssa") || ends_with(path, ".ass") )
+ 	{
+ 		return sql_exec(db, "DELETE from CAPTIONS where PATH = '%q'", path);
+ 	}
+diff -Naur b/metadata.c c/metadata.c
+--- b/metadata.c	2016-10-09 07:10:39.177310126 +0800
++++ c/metadata.c	2016-10-09 08:00:16.418569809 +0800
+@@ -159,6 +159,7 @@
+ {
+ 	char *file = malloc(MAXPATHLEN);
+ 	char *id = NULL;
++        int ret;
+ 
+ 	sprintf(file, "%s", path);
+ 	strip_ext(file);
+@@ -179,9 +180,21 @@
+ 			goto no_source_video;
+ 		}
+ 	}
+-
++	
+ 	strcat(file, ".srt");
+-	if( access(file, R_OK) == 0 )
++	ret = access(file, R_OK);
++	if (ret != 0)
++	{
++		strcat(file, ".ssa");
++		ret = access(file, R_OK);
++	}
++	if (ret != 0)
++	{
++		strcat(file, ".ass");
++		ret = access(file, R_OK);
++	}
++
++	if( ret == 0 )
+ 	{
+ 		sql_exec(db, "INSERT into CAPTIONS"
+ 		             " (ID, PATH) "

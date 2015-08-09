@@ -1,0 +1,19 @@
+diff -Naur a/src/Makefile b/src/Makefile
+--- a/src/Makefile	2016-03-04 03:11:46.000000000 +0800
++++ b/src/Makefile	2016-10-09 09:58:03.967856287 +0800
+@@ -10,11 +10,11 @@
+ 
+ WARN=-Wall -pedantic
+ 
+-BSD_CFLAGS=-O2 -fPIC $(WARN) $(INCDIR) $(DEFS)
+-BSD_LDFLAGS=-O -fPIC -shared $(LIBDIR)
++BSD_CFLAGS=-O2 -fpic $(WARN) $(INCDIR) $(DEFS)
++BSD_LDFLAGS=-O -fpic -shared $(LIBDIR)
+ 
+-LNX_CFLAGS=-O2 -fPIC $(WARN) $(INCDIR) $(DEFS)
+-LNX_LDFLAGS=-O -fPIC -shared $(LIBDIR)
++LNX_CFLAGS=-O2 -fpic $(WARN) $(INCDIR) $(DEFS)
++LNX_LDFLAGS=-O -fpic -shared $(LIBDIR)
+ 
+ MAC_ENV=env MACOSX_DEPLOYMENT_TARGET='$(MACVER)'
+ MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
