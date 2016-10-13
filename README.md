@@ -1,3 +1,4 @@
 # openwrt
 Script that applies some custom patches to openwrt/lede
-Please put the folder under the root of source tree
+
+Please link the folder to the root of openwrt/lede source tree

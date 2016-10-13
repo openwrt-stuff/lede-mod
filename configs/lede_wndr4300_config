@@ -2406,7 +2406,7 @@ CONFIG_PACKAGE_kmod-fs-cramfs=m
 CONFIG_PACKAGE_kmod-fs-exfat=y
 CONFIG_PACKAGE_kmod-fs-exportfs=y
 CONFIG_PACKAGE_kmod-fs-ext4=y
-# CONFIG_PACKAGE_kmod-fs-f2fs is not set
+CONFIG_PACKAGE_kmod-fs-f2fs=y
 CONFIG_PACKAGE_kmod-fs-fscache=m
 CONFIG_PACKAGE_kmod-fs-hfs=m
 CONFIG_PACKAGE_kmod-fs-hfsplus=m
@@ -3250,6 +3250,7 @@ CONFIG_PACKAGE_python-xml=y
 #
 # Tcl
 #
+# CONFIG_PACKAGE_ghostscript is not set
 # CONFIG_PACKAGE_vala is not set
 
 #
@@ -3408,6 +3409,11 @@ CONFIG_PACKAGE_libxtables=y
 # CONFIG_PACKAGE_libsctp is not set
 
 #
+# Printing
+#
+# CONFIG_PACKAGE_libijs is not set
+
+#
 # SSL
 #
 # CONFIG_PACKAGE_libcyassl is not set
@@ -3545,7 +3551,13 @@ CONFIG_PACKAGE_libblobmsg-json=y
 # CONFIG_PACKAGE_libcharset is not set
 # CONFIG_PACKAGE_libcoap is not set
 # CONFIG_PACKAGE_libconfig is not set
-CONFIG_PACKAGE_libcryptopp=y
+CONFIG_PACKAGE_libcryptopp=m
+# CONFIG_PACKAGE_libcups is not set
+# CONFIG_PACKAGE_libcupscgi is not set
+# CONFIG_PACKAGE_libcupsfilters is not set
+# CONFIG_PACKAGE_libcupsimage is not set
+# CONFIG_PACKAGE_libcupsmime is not set
+# CONFIG_PACKAGE_libcupsppdc is not set
 CONFIG_PACKAGE_libcurl=y
 
 #
@@ -3618,7 +3630,7 @@ CONFIG_PACKAGE_libexif=y
 CONFIG_PACKAGE_libexpat=y
 # CONFIG_PACKAGE_libexslt is not set
 # CONFIG_PACKAGE_libextractor is not set
-# CONFIG_PACKAGE_libf2fs is not set
+CONFIG_PACKAGE_libf2fs=m
 CONFIG_PACKAGE_libfaad2=m
 # CONFIG_FAAD2_ALWAYS_USE_FLOATING_POINT is not set
 # CONFIG_PACKAGE_libfastjson is not set
@@ -3762,6 +3774,7 @@ CONFIG_FFMPEG_CUSTOM_PROTOCOL_udp=y
 CONFIG_PACKAGE_libffmpeg-full=m
 # CONFIG_PACKAGE_libffmpeg-mini is not set
 CONFIG_PACKAGE_libflac=y
+# CONFIG_PACKAGE_libfontembed is not set
 # CONFIG_PACKAGE_libfreetype is not set
 # CONFIG_PACKAGE_libftdi is not set
 # CONFIG_PACKAGE_libftdi1 is not set
@@ -3774,23 +3787,30 @@ CONFIG_PACKAGE_libgmp=y
 # CONFIG_PACKAGE_libgnurl is not set
 # CONFIG_PACKAGE_libgpg-error is not set
 # CONFIG_PACKAGE_libgps is not set
+# CONFIG_PACKAGE_libgutenprint is not set
 # CONFIG_PACKAGE_libhamlib is not set
 # CONFIG_PACKAGE_libhiredis is not set
+# CONFIG_PACKAGE_libhpip is not set
+# CONFIG_PACKAGE_libhpipp is not set
+# CONFIG_PACKAGE_libhpmud is not set
 # CONFIG_PACKAGE_libhttp-parser is not set
 # CONFIG_PACKAGE_libical is not set
-# CONFIG_PACKAGE_libiconv is not set
+CONFIG_PACKAGE_libiconv=m
 CONFIG_PACKAGE_libiconv-full=y
 CONFIG_PACKAGE_libid3tag=y
 # CONFIG_PACKAGE_libidn is not set
 # CONFIG_PACKAGE_libimobiledevice is not set
 # CONFIG_PACKAGE_libinput is not set
-# CONFIG_PACKAGE_libintl is not set
+CONFIG_PACKAGE_libintl=m
 CONFIG_PACKAGE_libintl-full=y
 # CONFIG_PACKAGE_libiw is not set
 CONFIG_PACKAGE_libiwinfo=y
+# CONFIG_PACKAGE_libjbig is not set
+# CONFIG_PACKAGE_libjbig85 is not set
 CONFIG_PACKAGE_libjpeg=y
 CONFIG_PACKAGE_libjson-c=y
 # CONFIG_PACKAGE_libkmod is not set
+# CONFIG_PACKAGE_liblcms2 is not set
 # CONFIG_PACKAGE_libldns is not set
 CONFIG_PACKAGE_libltdl=m
 CONFIG_PACKAGE_liblua=y
@@ -3861,9 +3881,11 @@ CONFIG_PACKAGE_libpcre=y
 # CONFIG_PACKAGE_libplist is not set
 # CONFIG_PACKAGE_libplistcxx is not set
 CONFIG_PACKAGE_libpng=y
+# CONFIG_PACKAGE_libpoppler is not set
 CONFIG_PACKAGE_libpopt=m
 # CONFIG_PACKAGE_libpri is not set
 # CONFIG_PACKAGE_libprotobuf-c is not set
+# CONFIG_PACKAGE_libqpdf is not set
 # CONFIG_PACKAGE_libqrencode is not set
 # CONFIG_PACKAGE_libradcli is not set
 CONFIG_PACKAGE_libreadline=y
@@ -4043,6 +4065,7 @@ CONFIG_PACKAGE_luci-app-chinadns=y
 CONFIG_PACKAGE_luci-app-commands=y
 CONFIG_PACKAGE_luci-app-cpulimit=m
 # CONFIG_PACKAGE_luci-app-cshark is not set
+# CONFIG_PACKAGE_luci-app-cups is not set
 CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-app-diag-core=m
 CONFIG_PACKAGE_luci-app-dns2socks=y
@@ -4111,7 +4134,7 @@ CONFIG_PACKAGE_vpncert-clean=y
 #
 # 4. Themes
 #
-CONFIG_PACKAGE_luci-theme-bootstrap=y
+CONFIG_PACKAGE_luci-theme-bootstrap=m
 # CONFIG_PACKAGE_luci-theme-freifunk-generic is not set
 CONFIG_PACKAGE_luci-theme-material=y
 # CONFIG_PACKAGE_luci-theme-openwrt is not set
@@ -5246,6 +5269,7 @@ CONFIG_PACKAGE_dns2socks=y
 # P2P
 #
 CONFIG_PACKAGE_amule=y
+CONFIG_AMULE_CRYPTOPP_STATIC_LINKING=y
 CONFIG_PACKAGE_antileech=y
 
 #
@@ -5530,7 +5554,8 @@ CONFIG_OPENVPN_openssl_ENABLE_SMALL=y
 # CONFIG_PACKAGE_dansguardian is not set
 # CONFIG_PACKAGE_e2guardian is not set
 # CONFIG_PACKAGE_freshclam is not set
-# CONFIG_PACKAGE_haproxy is not set
+CONFIG_PACKAGE_haproxy=m
+# CONFIG_PACKAGE_halog is not set
 # CONFIG_PACKAGE_haproxy-nossl is not set
 # CONFIG_PACKAGE_lighttpd is not set
 # CONFIG_PACKAGE_nginx is not set
@@ -5824,6 +5849,40 @@ CONFIG_PACKAGE_wpad=y
 # CONFIG_PACKAGE_xinetd is not set
 
 #
+# Printing and Imaging
+#
+# CONFIG_PACKAGE_brlaser is not set
+# CONFIG_PACKAGE_c2esp is not set
+# CONFIG_PACKAGE_carps-cups is not set
+# CONFIG_PACKAGE_cndrvcups-capt is not set
+# CONFIG_PACKAGE_cndrvcups-capt-ppds is not set
+# CONFIG_PACKAGE_cndrvcups-common is not set
+# CONFIG_PACKAGE_cndrvcups-lb is not set
+# CONFIG_PACKAGE_cndrvcups-lb-ppds is not set
+# CONFIG_PACKAGE_cups is not set
+# CONFIG_PACKAGE_cups-bjnp is not set
+# CONFIG_PACKAGE_cups-bsd is not set
+# CONFIG_PACKAGE_cups-client is not set
+# CONFIG_PACKAGE_cups-filters is not set
+# CONFIG_PACKAGE_cups-ppdc is not set
+# CONFIG_PACKAGE_epson-alc1100-filter is not set
+# CONFIG_PACKAGE_epson-alcx11-filter is not set
+# CONFIG_PACKAGE_epson-inkjet-printer-escpr is not set
+# CONFIG_PACKAGE_epson-inkjet-printer-filter is not set
+# CONFIG_PACKAGE_epson-inkjet-printer-ppds is not set
+# CONFIG_PACKAGE_foo2zjs is not set
+# CONFIG_PACKAGE_foomatic-db-ppds is not set
+# CONFIG_PACKAGE_foomatic-filters is not set
+# CONFIG_PACKAGE_fxlinuxprint is not set
+# CONFIG_PACKAGE_gutenprint is not set
+# CONFIG_PACKAGE_hplip-cups is not set
+# CONFIG_PACKAGE_hplip-ppds is not set
+# CONFIG_PACKAGE_hplip-sane is not set
+# CONFIG_PACKAGE_openprinting-cups-filters is not set
+# CONFIG_PACKAGE_openprinting-ppds is not set
+# CONFIG_PACKAGE_splix is not set
+
+#
 # Sound
 #
 # CONFIG_PACKAGE_espeak is not set
@@ -5892,23 +5951,32 @@ CONFIG_PACKAGE_shairplay=m
 # CONFIG_PACKAGE_acl is not set
 # CONFIG_PACKAGE_attr is not set
 CONFIG_PACKAGE_badblocks=y
-# CONFIG_PACKAGE_btrfs-progs is not set
+CONFIG_PACKAGE_btrfs-progs=m
 # CONFIG_PACKAGE_chattr is not set
 # CONFIG_PACKAGE_debugfs is not set
-# CONFIG_PACKAGE_dosfsck is not set
-# CONFIG_PACKAGE_dosfslabel is not set
-# CONFIG_PACKAGE_dumpe2fs is not set
+CONFIG_PACKAGE_dosfsck=m
+CONFIG_PACKAGE_dosfslabel=m
+CONFIG_PACKAGE_dumpe2fs=m
 # CONFIG_PACKAGE_e2freefrag is not set
 CONFIG_PACKAGE_e2fsprogs=y
-# CONFIG_PACKAGE_f2fs-tools is not set
+CONFIG_PACKAGE_f2fs-tools=m
+
+#
+# Configuration
+#
+CONFIG_F2FS_UTILS_f2fstat=y
+CONFIG_F2FS_UTILS_fibmap_f2fs=y
+CONFIG_F2FS_UTILS_fsck_f2fs=y
+CONFIG_F2FS_UTILS_dump_f2fs=y
+CONFIG_F2FS_UTILS_mkfs_f2fs=y
 # CONFIG_PACKAGE_filefrag is not set
 # CONFIG_PACKAGE_fuse-utils is not set
 # CONFIG_PACKAGE_hfsfsck is not set
 # CONFIG_PACKAGE_lsattr is not set
-# CONFIG_PACKAGE_mkdosfs is not set
+CONFIG_PACKAGE_mkdosfs=m
 # CONFIG_PACKAGE_mkhfs is not set
 # CONFIG_PACKAGE_ncdu is not set
-# CONFIG_PACKAGE_nfs-utils is not set
+CONFIG_PACKAGE_nfs-utils=m
 CONFIG_PACKAGE_ntfs-3g=y
 CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE=y
 # CONFIG_PACKAGE_ntfs-3g-low is not set
@@ -6180,6 +6248,7 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_kmod is not set
 # CONFIG_PACKAGE_lcd4linux-custom is not set
 # CONFIG_PACKAGE_lcd4linux-full is not set
+# CONFIG_PACKAGE_lcms2 is not set
 # CONFIG_PACKAGE_less is not set
 # CONFIG_PACKAGE_less-wide is not set
 # CONFIG_PACKAGE_libhavege is not set
@@ -6221,6 +6290,7 @@ CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_owipcalc is not set
 # CONFIG_PACKAGE_pciutils is not set
 # CONFIG_PACKAGE_pcscd is not set
+# CONFIG_PACKAGE_poppler is not set
 # CONFIG_PACKAGE_pps-tools is not set
 # CONFIG_PACKAGE_prlimit is not set
 CONFIG_PACKAGE_procd-nand=y
@@ -6231,6 +6301,7 @@ CONFIG_PACKAGE_procd-nand=y
 # CONFIG_PACKAGE_px5g-polarssl is not set
 # CONFIG_PACKAGE_px5g-standalone is not set
 # CONFIG_PACKAGE_qemu-ga is not set
+# CONFIG_PACKAGE_qpdf is not set
 # CONFIG_PACKAGE_qrencode is not set
 # CONFIG_PACKAGE_rbcfg is not set
 # CONFIG_PACKAGE_relayctl is not set
