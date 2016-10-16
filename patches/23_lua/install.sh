@@ -10,4 +10,4 @@ mkdir -p $basedir/package/feeds/packages/luasec/patches
 cp $patchdir/001_luasec_replace_PIC_with_pic.patch $basedir/package/feeds/packages/luasec/patches
 
 mkdir -p $basedir/package/feeds/packages/lua-xavante/patches
-cp $patchdir/xavante_webdav_fix.patch $basedir/package/feeds/packages/luasec/patches
+cp $patchdir/xavante_webdav_fix.patch $basedir/package/feeds/packages/lua-xavante/patches
