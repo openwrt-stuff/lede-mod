@@ -1,4 +1,3 @@
-diff -Naur a/feeds/luci/modules/luci-base/Makefile b/feeds/luci/modules/luci-base/Makefile
 --- a/feeds/luci/modules/luci-base/Makefile	2016-09-12 07:41:57.000000000 +0800
 +++ b/feeds/luci/modules/luci-base/Makefile	2016-09-23 17:51:24.554207707 +0800
 @@ -12,5 +12,5 @@
@@ -8,7 +7,6 @@ diff -Naur a/feeds/luci/modules/luci-base/Makefile b/feeds/luci/modules/luci-bas
 -LUCI_DEPENDS:=+lua +libuci-lua +luci-lib-nixio +luci-lib-ip +rpcd +libubus-lua +luci-lib-jsonc
 +LUCI_DEPENDS:=+lua +libuci-lua +luci-lib-nixio +luci-lib-ip +rpcd +libubus-lua +luci-lib-jsonc +uhttpd-mod-lua
  
-diff -Naur a/feeds/luci/modules/luci-base/root/www/index.html b/feeds/luci/modules/luci-base/root/www/index.html
 --- a/feeds/luci/modules/luci-base/root/www/index.html	2016-09-12 07:41:57.000000000 +0800
 +++ b/feeds/luci/modules/luci-base/root/www/index.html	2016-09-23 17:54:16.010599717 +0800
 @@ -3,9 +3,9 @@
@@ -23,9 +21,33 @@ diff -Naur a/feeds/luci/modules/luci-base/root/www/index.html b/feeds/luci/modul
 +<a style="color: black; font-family: arial, helvetica, sans-serif;" href="/luci">LuCI - Lua Configuration Interface</a>
  </body>
  </html>
-diff -Naur a/package/network/services/uhttpd/files/uhttpd.config b/package/network/services/uhttpd/files/uhttpd.config
+--- a/feeds/luci/modules/luci-base/luasrc/view/sysauth.htm	2016-10-17 11:27:20.685948356 +0800
++++ b/feeds/luci/modules/luci-base/luasrc/view/sysauth.htm	2016-10-18 10:10:42.296889749 +0800
+@@ -48,6 +48,7 @@
+ local fs  = require "nixio.fs"
+ local https_key = uci:get("uhttpd", "main", "key")
+ local https_port = uci:get("uhttpd", "main", "listen_https")
++local https_redirect = uci:get("uhttpd", "main", "redirect_https") or '0'
+ if type(https_port) == "table" then
+ 	https_port = https_port[1]
+ end
+@@ -57,7 +58,7 @@
+ %>
+ 
+ <script type="text/javascript">//<![CDATA[
+-	if (document.location.protocol != 'https:') {
++	if (document.location.protocol != 'https:' && '<%=https_redirect%>' == '1') {
+ 		var url = 'https://' + window.location.hostname + ':' + '<%=https_port%>' + window.location.pathname;
+ 		var img=new Image;
+ 		img.onload=function(){window.location = url};
 --- a/package/network/services/uhttpd/files/uhttpd.config	2016-09-12 07:41:04.000000000 +0800
 +++ b/package/network/services/uhttpd/files/uhttpd.config	2016-09-23 17:52:32.806956456 +0800
+@@ -12,4 +12,4 @@
+ 	# Redirect HTTP requests to HTTPS if possible
+-	option redirect_https	1
++	option redirect_https	0
+ 
+ 	# Server document root
 @@ -51,8 +51,8 @@
  
  	# Lua url prefix and handler script.

@@ -8,6 +8,6 @@ rm_lock() {
 
 rm_lock
 
-cd $basedir/target/linux/ar71xx/image/
-rm -f legacy.mk
-git checkout legacy.mk
+cd $basedir/feeds/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/
+rm -rf ./*
+git checkout . 

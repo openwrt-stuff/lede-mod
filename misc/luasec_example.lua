@@ -16,6 +16,10 @@ conn:dohandshake()
 print(conn:receive("*l"))
 conn:close()
 
+
+
+
+
 --Server code
 
 require("socket")
@@ -35,6 +39,12 @@ conn:dohandshake()
 --
 conn:send("one line\n")
 conn:close()
+
+
+
+
+
+
 
 --LuaSec needs a set of information (such as protocol, key, certificate, etc.) to wrap the TCP connection. For instance, we --can use the following parameters in the example above:
 
