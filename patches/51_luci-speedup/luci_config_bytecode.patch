@@ -1,0 +1,36 @@
+diff -Naur a/feeds/luci/luci.mk b/feeds/luci/luci.mk
+--- a/feeds/luci/luci.mk	2016-10-16 19:36:25.000000000 +0800
++++ b/feeds/luci/luci.mk	2016-10-19 10:32:50.000000000 +0800
+@@ -110,6 +110,10 @@
+ 	bool "Minify Lua sources"
+ 	default n
+ 
++   config LUCI_BYTECODE
++	bool "Convert Lua sources to bytecode"
++	default n
++
+    menu "Translations"$(foreach lang,$(LUCI_LANGUAGES),
+ 
+      config LUCI_LANG_$(lang)
+@@ -155,12 +159,21 @@
+ 	done
+ endef
+ 
++LUAC:="$(STAGING_DIR)/host/bin/luac"
++define LuaC
++	$(FIND) $(1) -type f -name '*.lua' | while read src; do \
++		if "$(LUAC)" -s -o "$$$$src.o" "$$$$src"; \
++		then mv "$$$$src.o" "$$$$src"; fi; \
++	done
++endef
++
+ define Package/$(PKG_NAME)/install
+ 	if [ -d $(PKG_BUILD_DIR)/luasrc ]; then \
+ 	  $(INSTALL_DIR) $(1)$(LUCI_LIBRARYDIR); \
+ 	  cp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)$(LUCI_LIBRARYDIR)/; \
+ 	  $(FIND) $(1)$(LUCI_LIBRARYDIR)/ -type f -name '*.luadoc' | $(XARGS) rm; \
+ 	  $(if $(CONFIG_LUCI_SRCDIET),$(call SrcDiet,$(1)$(LUCI_LIBRARYDIR)/),true); \
++	  $(if $(CONFIG_LUCI_BYTECODE),$(call LuaC,$(1)$(LUCI_LIBRARYDIR)/),true); \
+ 	else true; fi
+ 	if [ -d $(PKG_BUILD_DIR)/htdocs ]; then \
+ 	  $(INSTALL_DIR) $(1)$(HTDOCS); \

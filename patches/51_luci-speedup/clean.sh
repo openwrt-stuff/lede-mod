@@ -6,6 +6,11 @@ rm_lock() {
 }
 
 rm_lock
+cd $basedir/feeds/luci
+rm -f ./luci.mk
+git checkout ./luci.mk
+
+rm_lock
 cd $basedir/feeds/luci/modules/luci-base
 rm -rf ./*
 git checkout . 
