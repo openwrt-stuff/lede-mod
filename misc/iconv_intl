@@ -1,0 +1,6 @@
+$(ICONV_DEPENDS) $(INTL_DEPENDS)
+
+libintl-full
++PACKAGE_libintl-full:libintl-full
+
+feeds/packages/sound/alsa-utils/
