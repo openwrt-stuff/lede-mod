@@ -1,0 +1,20 @@
+package/feeds/packages/node/patches/
+--- a/deps/v8/src/sampler.cc	2016-05-25 01:39:38.000000000 +0800
++++ b/deps/v8/src/sampler.cc	2016-10-26 12:30:38.441951368 +0800
+@@ -405,9 +405,13 @@
+   state.sp = reinterpret_cast<Address>(mcontext.gregs[29]);
+   state.fp = reinterpret_cast<Address>(mcontext.gregs[30]);
+ #elif V8_HOST_ARCH_PPC
+-  state.pc = reinterpret_cast<Address>(ucontext->uc_mcontext.regs->nip);
+-  state.sp = reinterpret_cast<Address>(ucontext->uc_mcontext.regs->gpr[PT_R1]);
+-  state.fp = reinterpret_cast<Address>(ucontext->uc_mcontext.regs->gpr[PT_R31]);
++#include <asm/ptrace.h>
++//#define PT_R1	1
++//#define PT_R31	31
++//#define PT_NIP	32
++  state.pc = reinterpret_cast<Address>(ucontext->uc_mcontext.gregs[PT_NIP]);
++  state.sp = reinterpret_cast<Address>(ucontext->uc_mcontext.gregs[PT_R1]);
++  state.fp = reinterpret_cast<Address>(ucontext->uc_mcontext.gregs[PT_R31]);
+ #endif  // V8_HOST_ARCH_*
+ #elif V8_OS_MACOSX
+ #if V8_HOST_ARCH_X64

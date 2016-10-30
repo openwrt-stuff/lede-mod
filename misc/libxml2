@@ -1,0 +1,1 @@
+HOST_CONFIGURE_ARGS += --without-zlib
