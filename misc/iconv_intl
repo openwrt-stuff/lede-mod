@@ -2,7 +2,8 @@ $(ICONV_DEPENDS) $(INTL_DEPENDS)
 
 libintl-full
 +PACKAGE_libintl-full:libintl-full
-
+  DEPENDS:= +PACKAGE_libintl-full:libintl-full
+  
 feeds/packages/sound/alsa-utils
 
 package/utils/util-linux/ blkdiscard blkid cfdisk dmesg fdisk flock logger losetup lsblk sfdisk mount-utils partx-utils swap-utils whereis wipefs findfs
@@ -15,6 +16,17 @@ feeds/packages/utils/gnupg
     
 feeds/packages/utils/tar
 
+feeds/packages/utils/bash
+
+feeds/packages/libs/gnutls
+
+feeds/packages/net/netcat
+
+feeds/packages/net/ntpd
+
+feeds/packages/lang/python
+Package/python-light
+
 define Package/v4l-utils
   $(call Package/libv4l/Default)
   SECTION:=utils
@@ -23,3 +35,4 @@ define Package/v4l-utils
   DEPENDS := +libv4l $(CXX_DEPENDS) $(ICONV_DEPENDS) $(INTL_DEPENDS)
 endef
 
+python3-base

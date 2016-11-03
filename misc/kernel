@@ -1,0 +1,17 @@
+package/kernel/linux/modules/netsupport.mk
+
+
+define KernelPackage/capi
+  SUBMENU:=$(NETWORK_SUPPORT_MENU)
+  TITLE:=CAPI (ISDN) Support
+  KCONFIG:= \
+	CONFIG_ISDN_CAPI \
+	CONFIG_ISDN_CAPI_CAPI20 \
+	CONFIG_ISDN_CAPIFS \
+	CONFIG_ISDN_CAPI_CAPIFS \
+	CONFIG_ISDN_CAPI_MIDDLEWARE
+  FILES:= \
+	$(LINUX_DIR)/drivers/isdn/capi/kernelcapi.ko \
+	$(LINUX_DIR)/drivers/isdn/capi/capi.ko
+  AUTOLOAD:=$(call AutoLoad,30,kernelcapi capi)
+endef

@@ -1,7 +1,18 @@
 diff -Naur openwrt-old/include/netfilter.mk openwrt/include/netfilter.mk
 --- openwrt-old/include/netfilter.mk	2015-06-21 00:06:38.769029432 +0800
 +++ openwrt/include/netfilter.mk	2015-06-21 00:10:24.611328759 +0800
-@@ -383,3 +383,23 @@
+@@ -303,6 +310,10 @@
+ $(eval $(call nf_add,EBTABLES,CONFIG_BRIDGE_EBT_REDIRECT, $(P_EBT)ebt_redirect))
+ $(eval $(call nf_add,EBTABLES_IP4,CONFIG_BRIDGE_EBT_SNAT, $(P_EBT)ebt_snat))
+ 
++# arpnat
++$(eval $(call nf_add,EBTABLES,CONFIG_BRIDGE_EBT_ARPNAT, $(P_EBT)ebt_arpnat))
++
++
+ # watchers
+ $(eval $(call nf_add,EBTABLES_WATCHERS,CONFIG_BRIDGE_EBT_LOG, $(P_EBT)ebt_log))
+ $(eval $(call nf_add,EBTABLES_WATCHERS,CONFIG_BRIDGE_EBT_ULOG, $(P_EBT)ebt_ulog))
+@@ -375,3 +386,28 @@
  IPT_BUILTIN += $(EBTABLES_WATCHERS-y)
  
  endif # __inc_netfilter
@@ -22,13 +33,18 @@ diff -Naur openwrt-old/include/netfilter.mk openwrt/include/netfilter.mk
 +IPT_BUILTIN += $(IPT_TIMERANGE-y)
 +
 +
++IPT_LAYER7-m :=
++IPT_LAYER7-$(CONFIG_IP_NF_MATCH_LAYER7) += $(P_V4)ipt_layer7
++IPT_BUILTIN += $(IPT_LAYER7-y)
++
++
 +IPT_BANDWIDTH-m :=
 +IPT_BANDWIDTH-$(CONFIG_IP_NF_MATCH_BANDWIDTH) += $(P_V4)ipt_bandwidth
 +IPT_BUILTIN += $(IPT_BANDWIDTH-y)
 diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package/kernel/linux/modules/netfilter.mk
 --- openwrt-old/package/kernel/linux/modules/netfilter.mk	2015-06-21 00:06:42.044885815 +0800
 +++ openwrt/package/kernel/linux/modules/netfilter.mk	2015-06-21 00:10:24.611328759 +0800
-@@ -872,3 +872,47 @@
+@@ -872,3 +872,58 @@
  
  $(eval $(call KernelPackage,nft-nat6))
  
@@ -37,10 +53,10 @@ diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package
 +define KernelPackage/ipt-weburl
 +  SUBMENU:=$(NF_MENU)
 +  TITLE:=weburl
-+  KCONFIG:=$(KCONFIG_IPT_WEBURL)
++  KCONFIG:=CONFIG_IP_NF_MATCH_WEBURL
 +  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*weburl*.$(LINUX_KMOD_SUFFIX)
 +  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_WEBURL-m)))
-+	DEPENDS:= kmod-ipt-core
++	DEPENDS:= +kmod-ipt-core
 +endef
 +$(eval $(call KernelPackage,ipt-weburl))
 +
@@ -48,10 +64,10 @@ diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package
 +define KernelPackage/ipt-webmon
 +  SUBMENU:=$(NF_MENU)
 +  TITLE:=webmon
-+  KCONFIG:=$(KCONFIG_IPT_WEBMON)
++  KCONFIG:=CONFIG_IP_NF_MATCH_WEBMON
 +  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*webmon*.$(LINUX_KMOD_SUFFIX)
 +  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_WEBMON-m)))
-+	DEPENDS:= kmod-ipt-core
++	DEPENDS:= +kmod-ipt-core
 +endef
 +$(eval $(call KernelPackage,ipt-webmon))
 +
@@ -59,10 +75,10 @@ diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package
 +define KernelPackage/ipt-timerange
 +  SUBMENU:=$(NF_MENU)
 +  TITLE:=timerange
-+  KCONFIG:=$(KCONFIG_IPT_TIMERANGE)
++  KCONFIG:=CONFIG_IP_NF_MATCH_TIMERANGE
 +  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*timerange*.$(LINUX_KMOD_SUFFIX)
 +  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_TIMERANGE-m)))
-+	DEPENDS:= kmod-ipt-core
++	DEPENDS:= +kmod-ipt-core
 +endef
 +$(eval $(call KernelPackage,ipt-timerange))
 +
@@ -70,16 +86,27 @@ diff -Naur openwrt-old/package/kernel/linux/modules/netfilter.mk openwrt/package
 +define KernelPackage/ipt-bandwidth
 +  SUBMENU:=$(NF_MENU)
 +  TITLE:=bandwidth
-+  KCONFIG:=$(KCONFIG_IPT_BANDWIDTH)
++  KCONFIG:=CONFIG_IP_NF_MATCH_BANDWIDTH
 +  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*bandwidth*.$(LINUX_KMOD_SUFFIX)
 +  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_BANDWIDTH-m)))
-+	DEPENDS:= kmod-ipt-core
++	DEPENDS:= +kmod-ipt-core
 +endef
 +$(eval $(call KernelPackage,ipt-bandwidth))
++
++
++define KernelPackage/ipt-layer7
++  SUBMENU:=$(NF_MENU)
++  TITLE:=layer7
++  KCONFIG:=CONFIG_IP_NF_MATCH_LAYER7
++  FILES:=$(LINUX_DIR)/net/ipv4/netfilter/*layer7*.$(LINUX_KMOD_SUFFIX)
++  AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_LAYER7-m)))
++	DEPENDS:= +kmod-ipt-core +kmod-ipt-conntrack
++endef
++$(eval $(call KernelPackage,ipt-layer7))
 diff -Naur openwrt-old/package/network/utils/iptables/Makefile openwrt/package/network/utils/iptables/Makefile
 --- openwrt-old/package/network/utils/iptables/Makefile	2015-06-21 00:06:39.225009435 +0800
 +++ openwrt/package/network/utils/iptables/Makefile	2015-06-21 00:10:24.611328759 +0800
-@@ -562,3 +562,31 @@
+@@ -562,3 +562,38 @@
  $(eval $(call BuildPackage,libxtables))
  $(eval $(call BuildPlugin,iptables-mod-imq,$(IPT_IMQ-m)))
  
@@ -111,3 +138,10 @@ diff -Naur openwrt-old/package/network/utils/iptables/Makefile openwrt/package/n
 +  TITLE:=bandwidth
 +endef
 +$(eval $(call BuildPlugin,iptables-mod-bandwidth,$(IPT_BANDWIDTH-m)))
++
++
++define Package/iptables-mod-layer7
++$(call Package/iptables/Module, +kmod-ipt-layer7)
++  TITLE:=layer7
++endef
++$(eval $(call BuildPlugin,iptables-mod-layer7,$(IPT_LAYER7-m)))

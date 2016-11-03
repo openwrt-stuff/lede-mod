@@ -1,7 +1,7 @@
-diff -ruN a/block.c b/block.c
---- a/block.c	2015-01-11 12:35:56.775935603 +0800
-+++ b/block.c	2015-01-11 12:35:01.155976358 +0800
-@@ -245,6 +245,55 @@
+diff -Naur a/block.c b/block.c
+--- a/block.c	2016-10-31 23:36:17.000000000 +0800
++++ b/block.c	2016-11-02 16:50:27.650350965 +0800
+@@ -241,6 +241,55 @@
  	free(optstr);
  }
  
@@ -57,24 +57,22 @@ diff -ruN a/block.c b/block.c
  static int mount_add(struct uci_section *s)
  {
  	struct blob_attr *tb[__MOUNT_MAX] = { 0 };
-@@ -523,6 +572,7 @@
+@@ -530,6 +579,7 @@
  		printf("\toption\tuuid\t'%s'\n", pr->uuid);
  	else
  		printf("\toption\tdevice\t'%s'\n", pr->dev);
-+	printf("\toption\tfstype\t'%s'\n", (!strcmp(pr->id->name, "ntfs") ? "ntfs-3g" : pr->id->name));
++	printf("\toption\tfstype\t'%s'\n", (!strcmp(pr->type, "ntfs") ? "ntfs-3g" : pr->type));
  	printf("\toption\tenabled\t'0'\n\n");
  
  	return 0;
-@@ -701,8 +751,28 @@
+@@ -948,7 +998,28 @@
  		if (check_fs)
  			check_filesystem(pr);
  
--		err = mount(pr->dev, target, pr->id->name, m->flags,
--		            (m->options) ? (m->options) : (""));
-+		if (strcmp(pr->id->name, "ntfs-3g") && strcmp(pr->id->name, "ntfs") && strcmp(pr->id->name, "exfat"))
+-		err = handle_mount(pr->dev, target, pr->type, m);
++		if (strcmp(pr->type, "ntfs-3g") && strcmp(pr->type, "ntfs") && strcmp(pr->type, "exfat"))
 +		{
-+			err = mount(pr->dev, target, pr->id->name, m->flags,
-+		    		(m->options) ? (m->options) : (""));
++			err = handle_mount(pr->dev, target, pr->type, m);
 +		}
 +		else
 +		{
@@ -83,39 +81,41 @@ diff -ruN a/block.c b/block.c
 +
 +			param = mount_flags_to_string(m->flags);
 +
-+			if (strcmp(pr->id->name, "exfat"))
-+				snprintf(cmd, sizeof (cmd), "ntfs-3g -o \"%s,%s\" %s %s >/dev/null",
-+					param, (m->options) ? (m->options) : (""), pr->dev, target);
++			if (strcmp(pr->type, "exfat"))
++				snprintf(cmd, sizeof (cmd), "ntfs-3g -o \"%s\" %s %s >/dev/null",
++					param, pr->dev, target);
 +
 +			else
-+				snprintf(cmd, sizeof (cmd), "mount -t exfat -o \"%s,%s\" %s %s >/dev/null",
-+					param, (m->options) ? (m->options) : (""), pr->dev, target);
++				snprintf(cmd, sizeof (cmd), "mount -t exfat -o \"%s\" %s %s >/dev/null",
++					param, pr->dev, target);
 +
 +			err = system(cmd);
 +		}
++
  		if (err)
- 			ERROR("mounting %s (%s) as %s failed (%d) - %s\n",
- 					pr->dev, pr->id->name, target, err, strerror(err));
-@@ -721,7 +791,21 @@
+ 			ULOG_ERR("mounting %s (%s) as %s failed (%d) - %s\n",
+ 			         pr->dev, pr->type, target, errno, strerror(errno));
+@@ -967,7 +1038,22 @@
  		if (check_fs)
  			check_filesystem(pr);
  
--		err = mount(pr->dev, target, pr->id->name, 0, "");
-+		if (strcmp(pr->id->name, "ntfs-3g") && strcmp(pr->id->name, "ntfs") && strcmp(pr->id->name, "exfat"))
+-		err = handle_mount(pr->dev, target, pr->type, NULL);
++		if (strcmp(pr->type, "ntfs-3g") && strcmp(pr->type, "ntfs") && strcmp(pr->type, "exfat"))
 +		{
-+			err = mount(pr->dev, target, pr->id->name, 0, "");
++			err = handle_mount(pr->dev, target, pr->type, NULL);
 +		}
 +		else
 +		{
 +			char cmd[1024];
 +
-+			if (strcmp(pr->id->name, "exfat"))
++			if (strcmp(pr->type, "exfat"))
 +				snprintf(cmd, sizeof (cmd), "ntfs-3g %s %s >/dev/null", pr->dev, target);
 +			else
 +				snprintf(cmd, sizeof (cmd), "mount -t exfat %s %s >/dev/null", pr->dev, target);
 +
 +			err = system(cmd);
 +		}
++
  		if (err)
- 			ERROR("mounting %s (%s) as %s failed (%d) - %s\n",
- 					pr->dev, pr->id->name, target, err, strerror(err));
+ 			ULOG_ERR("mounting %s (%s) as %s failed (%d) - %s\n",
+ 			         pr->dev, pr->type, target, errno, strerror(errno));

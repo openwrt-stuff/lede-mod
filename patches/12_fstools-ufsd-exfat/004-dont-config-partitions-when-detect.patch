@@ -1,39 +1,39 @@
-diff -ruN a/block.c b/block.c
---- a/block.c	2015-01-11 12:37:30.262929124 +0800
-+++ b/block.c	2015-01-11 12:37:41.959933009 +0800
-@@ -559,7 +559,7 @@
- 
- 	return 0;
+diff -Naur c/block.c d/block.c
+--- c/block.c	2016-11-02 16:57:25.830772485 +0800
++++ d/block.c	2016-11-02 17:01:00.887356118 +0800
+@@ -568,7 +568,7 @@
+ 	_cache_load("/dev/mapper/*");
  }
+ 
 -
 +/*
- static int print_block_uci(struct blkid_struct_probe *pr)
+ static int print_block_uci(struct probe_info *pr)
  {
- 	if (!strcmp(pr->id->name, "swap")) {
-@@ -577,7 +577,7 @@
+ 	if (!strcmp(pr->type, "swap")) {
+@@ -586,7 +586,7 @@
  
  	return 0;
  }
 -
 +*/
- static struct blkid_struct_probe* find_block_info(char *uuid, char *label, char *path)
+ static struct probe_info* find_block_info(char *uuid, char *label, char *path)
  {
- 	struct blkid_struct_probe *pr = NULL;
-@@ -1235,7 +1235,7 @@
+ 	struct probe_info *pr = NULL;
+@@ -1543,7 +1543,7 @@
  
  static int main_detect(int argc, char **argv)
  {
--	struct blkid_struct_probe *pr;
-+//	struct blkid_struct_probe *pr;
+-	struct probe_info *pr;
++	/*struct probe_info *pr;*/
  
  	cache_load(0);
  	printf("config 'global'\n");
-@@ -1245,9 +1245,9 @@
+@@ -1553,9 +1553,9 @@
  	printf("\toption\tauto_mount\t'1'\n");
  	printf("\toption\tdelay_root\t'5'\n");
  	printf("\toption\tcheck_fs\t'0'\n\n");
 -	list_for_each_entry(pr, &devices, list)
-+/*	list_for_each_entry(pr, &devices, list)
++	/*list_for_each_entry(pr, &devices, list)
  		print_block_uci(pr);
 -
 +*/
