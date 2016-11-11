@@ -15,7 +15,7 @@
  
 +define Build/Prepare
 +	$(call Build/Prepare/Default)
-+	cd $(PKG_BUILD_DIR) && autoreconf #&& sed -i 's/0.18/0.19/g' po/Makefile.in.in #gettextize -f
++	#cd $(PKG_BUILD_DIR) && autoreconf #&& sed -i 's/0.18/0.19/g' po/Makefile.in.in #gettextize -f
 +endef
 +
  define Package/minidlna/install
