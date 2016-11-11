@@ -5,6 +5,7 @@ BUILDROOT=$(cd `dirname $0`;cd ..;pwd)
 cd  $BUILDROOT
 
 [ -f $BUILDROOT/rules.mk ] || exit 1
+[ -f $BUILDROOT/feeds/packages/LICENSE ] || exit 1
 
 
 ls $BASEDIR/patches/*/clean.sh | while read line

@@ -1,0 +1,12 @@
+--- a/toolchain/gcc/Config.in	2016-11-07 20:33:16.863101131 +0800
++++ b/toolchain/gcc/Config.in	2016-11-08 17:14:37.185779586 +0800
+@@ -74,7 +74,8 @@
+ config INSTALL_GCCGO
+ 	bool
+ 	prompt "Build/install Go compiler?" if TOOLCHAINOPTS
+-	depends on !GCC_VERSION_4_8 && (USE_GLIBC || BROKEN)
++	depends on !GCC_VERSION_4_8
++	#&& (USE_GLIBC || BROKEN)
+ 	default n
+ 	help
+ 	    Build/install GNU gccgo compiler ?

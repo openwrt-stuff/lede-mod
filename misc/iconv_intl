@@ -2,11 +2,20 @@ $(ICONV_DEPENDS) $(INTL_DEPENDS)
 
 libintl-full
 +PACKAGE_libintl-full:libintl-full
-  DEPENDS:= +PACKAGE_libintl-full:libintl-full
+  DEPENDS+= +PACKAGE_libintl-full:libintl-full
+  DEPENDS+= +PACKAGE_libintl-full:libintl-full +PACKAGE_libiconv-full:libiconv-full
   
+package/libs/libiconv-full (define Package/iconv)
+
+package/libs/popt
+
 feeds/packages/sound/alsa-utils
 
-package/utils/util-linux/ blkdiscard blkid cfdisk dmesg fdisk flock logger losetup lsblk sfdisk mount-utils partx-utils swap-utils whereis wipefs findfs
+feeds/packages/net/rsync (both)
+
+feeds/packages/net/tcpreplay
+
+package/utils/util-linux/ blkdiscard blkid cfdisk dmesg fdisk flock logger losetup lsblk sfdisk mount-utils partx-utils swap-utils whereis wipefs findfs getopt
 
 feeds/packages/utils/grep
     

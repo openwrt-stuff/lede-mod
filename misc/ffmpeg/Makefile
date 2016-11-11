@@ -371,6 +371,7 @@ FFMPEG_CONFIGURE:= \
 	\
 	--enable-gpl \
 	--enable-version3 \
+	--disable-altivec \
 	\
 	--disable-dxva2 \
 	--disable-lzma \
