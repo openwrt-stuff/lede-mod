@@ -1,0 +1,9 @@
+--- a/feeds/packages/net/autossh/files/autossh.config	2016-10-05 21:25:20.147481143 +0800
++++ b/feeds/packages/net/autossh/files/autossh.config	2016-11-13 12:17:58.972367141 +0800
+@@ -1,5 +1,5 @@
+ config autossh
+-	option ssh	'-i /etc/dropbear/id_rsa -N -T -R 2222:localhost:22 user@host'
++	option ssh	'-N -v -i /etc/openssh/id_rsa -D localhost:2222 user@host -p 22 ping 8.8.8.8 -i 10's
+ 	option gatetime	'0'
+ 	option monitorport	'20000'
+ 	option poll	'600'

@@ -299,6 +299,7 @@ CONFIG_EXTRA_GCC_CONFIG_OPTIONS=""
 # CONFIG_SJLJ_EXCEPTIONS is not set
 # CONFIG_INSTALL_LIBGCJ is not set
 # CONFIG_INSTALL_GFORTRAN is not set
+# CONFIG_INSTALL_GCCGO is not set
 
 #
 # C Library
@@ -342,7 +343,7 @@ CONFIG_VERSIONOPT=y
 CONFIG_VERSION_DIST="Lede"
 CONFIG_VERSION_NICK=""
 CONFIG_VERSION_NUMBER=""
-CONFIG_VERSION_REPO="https://medetashi.000webhostapp.com/lede"
+CONFIG_VERSION_REPO="http://medetashi.webutu.com/lede"
 CONFIG_VERSION_MANUFACTURER=""
 CONFIG_VERSION_MANUFACTURER_URL=""
 CONFIG_VERSION_BUG_URL=""
@@ -2230,13 +2231,17 @@ CONFIG_PACKAGE_usign=y
 # CONFIG_PACKAGE_zabbix-proxy is not set
 # CONFIG_PACKAGE_zabbix-sender is not set
 # CONFIG_PACKAGE_zabbix-server is not set
-# CONFIG_PACKAGE_debootstrap is not set
 # CONFIG_PACKAGE_htop is not set
 # CONFIG_PACKAGE_monit is not set
 # CONFIG_PACKAGE_monit-nossl is not set
 # CONFIG_PACKAGE_muninlite is not set
 # CONFIG_PACKAGE_netdata is not set
 CONFIG_PACKAGE_sudo=m
+
+#
+# AgoControl
+#
+# CONFIG_PACKAGE_libjsoncpp is not set
 
 #
 # Boot Loaders
@@ -2857,6 +2862,7 @@ CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
 # CONFIG_PACKAGE_kmod-regmap is not set
 # CONFIG_PACKAGE_kmod-rotary-gpio-custom is not set
 # CONFIG_PACKAGE_kmod-rtc-ds1307 is not set
+# CONFIG_PACKAGE_kmod-rtc-ds1374 is not set
 # CONFIG_PACKAGE_kmod-rtc-ds1672 is not set
 # CONFIG_PACKAGE_kmod-rtc-isl1208 is not set
 # CONFIG_PACKAGE_kmod-rtc-pcf2123 is not set
@@ -3520,6 +3526,7 @@ CONFIG_PACKAGE_python3-openssl=m
 CONFIG_PACKAGE_python3-pip=m
 CONFIG_PACKAGE_python3-pydoc=m
 CONFIG_PACKAGE_python3-setuptools=m
+# CONFIG_PACKAGE_python3-smbus is not set
 CONFIG_PACKAGE_python3-sqlite3=m
 CONFIG_PACKAGE_python3-unittest=m
 CONFIG_PACKAGE_python3-xml=m
@@ -4366,7 +4373,6 @@ CONFIG_PACKAGE_luci-ssl-openssl=y
 #
 CONFIG_PACKAGE_luci-base=y
 # CONFIG_LUCI_SRCDIET is not set
-# CONFIG_LUCI_BYTECODE is not set
 
 #
 # Translations
@@ -4441,7 +4447,8 @@ CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-gmediarender=m
 CONFIG_PACKAGE_luci-app-hd-idle=y
 # CONFIG_PACKAGE_luci-app-hnet is not set
-# CONFIG_PACKAGE_luci-app-mentohust is not set
+CONFIG_PACKAGE_luci-app-kcptun=y
+CONFIG_PACKAGE_luci-app-mentohust=m
 # CONFIG_PACKAGE_luci-app-meshwizard is not set
 CONFIG_PACKAGE_luci-app-minidlna=y
 CONFIG_PACKAGE_luci-app-mjpg-streamer=y
@@ -4449,7 +4456,7 @@ CONFIG_PACKAGE_luci-app-mwan3=y
 # CONFIG_PACKAGE_luci-app-n2n is not set
 CONFIG_PACKAGE_luci-app-nfsd=y
 CONFIG_PACKAGE_luci-app-ngrokc=y
-# CONFIG_PACKAGE_luci-app-njit8021xclient is not set
+CONFIG_PACKAGE_luci-app-njit8021xclient=m
 CONFIG_PACKAGE_luci-app-ntpc=y
 # CONFIG_PACKAGE_luci-app-ocserv is not set
 # CONFIG_PACKAGE_luci-app-olsr is not set
@@ -4462,6 +4469,7 @@ CONFIG_PACKAGE_luci-app-privoxy=m
 CONFIG_PACKAGE_luci-app-qos=m
 CONFIG_PACKAGE_luci-app-qos-guoguo=y
 CONFIG_PACKAGE_luci-app-qos_gargoyle=m
+CONFIG_PACKAGE_luci-app-qosv4=m
 # CONFIG_PACKAGE_luci-app-radicale is not set
 CONFIG_PACKAGE_luci-app-redsocks2-alt=y
 # CONFIG_PACKAGE_luci-app-rp-pppoe-server is not set
@@ -4498,6 +4506,7 @@ CONFIG_PACKAGE_vpncert-clean=y
 #
 # 4. Themes
 #
+CONFIG_PACKAGE_luci-theme-atmaterial=y
 CONFIG_PACKAGE_luci-theme-bootstrap=m
 # CONFIG_PACKAGE_luci-theme-freifunk-generic is not set
 CONFIG_PACKAGE_luci-theme-material=y
@@ -5004,7 +5013,6 @@ CONFIG_PACKAGE_mailsend=m
 # CONFIG_PACKAGE_mailsend-nossl is not set
 # CONFIG_PACKAGE_msmtp is not set
 # CONFIG_PACKAGE_msmtp-nossl is not set
-# CONFIG_PACKAGE_msmtp-queue is not set
 CONFIG_PACKAGE_mutt=m
 # CONFIG_PACKAGE_nail is not set
 # CONFIG_PACKAGE_postfix is not set
@@ -6396,9 +6404,18 @@ CONFIG_PACKAGE_xl2tpd=y
 #
 # CONFIG_PACKAGE_fossil is not set
 # CONFIG_PACKAGE_git is not set
+# CONFIG_PACKAGE_gitolite is not set
 # CONFIG_PACKAGE_subversion-client is not set
 # CONFIG_PACKAGE_subversion-libs is not set
 # CONFIG_PACKAGE_subversion-server is not set
+
+#
+# WWAN
+#
+CONFIG_PACKAGE_comgt=m
+# CONFIG_PACKAGE_comgt-directip is not set
+# CONFIG_PACKAGE_comgt-ncm is not set
+# CONFIG_PACKAGE_uqmi is not set
 
 #
 # Web
@@ -6417,6 +6434,8 @@ CONFIG_PACKAGE_xl2tpd=y
 CONFIG_PACKAGE_haproxy=m
 # CONFIG_PACKAGE_halog is not set
 # CONFIG_PACKAGE_haproxy-nossl is not set
+CONFIG_PACKAGE_kcptun-client=y
+# CONFIG_PACKAGE_kcptun-server is not set
 # CONFIG_PACKAGE_lighttpd is not set
 # CONFIG_PACKAGE_nginx is not set
 CONFIG_PACKAGE_ngrokc=y
@@ -6452,6 +6471,7 @@ CONFIG_PACKAGE_privoxy=m
 # CONFIG_PRIVOXY_enable-accept-filter is not set
 # CONFIG_PRIVOXY_enable-strptime-sanity-checks is not set
 # CONFIG_PRIVOXY_enable-compression is not set
+# CONFIG_PACKAGE_proxychains is not set
 # CONFIG_PACKAGE_radicale-py2 is not set
 # CONFIG_PACKAGE_radicale-py3 is not set
 # CONFIG_PACKAGE_shadowsocks-client is not set
@@ -6691,7 +6711,6 @@ CONFIG_PACKAGE_uclient-fetch=y
 CONFIG_PACKAGE_udpxy=y
 # CONFIG_PACKAGE_ulogd is not set
 # CONFIG_PACKAGE_umbim is not set
-# CONFIG_PACKAGE_uqmi is not set
 # CONFIG_PACKAGE_usbip is not set
 CONFIG_PACKAGE_vlmcsd=y
 # CONFIG_PACKAGE_vnstat is not set
@@ -6770,6 +6789,7 @@ CONFIG_PACKAGE_xinetd=m
 # CONFIG_PACKAGE_ices is not set
 # CONFIG_PACKAGE_lame is not set
 CONFIG_PACKAGE_lame-lib=m
+# CONFIG_PACKAGE_liblo-utils is not set
 # CONFIG_PACKAGE_madplay is not set
 # CONFIG_PACKAGE_madplay-alsa is not set
 # CONFIG_PACKAGE_moc is not set
@@ -6805,6 +6825,7 @@ CONFIG_PACKAGE_shairplay=m
 #
 # CONFIG_PACKAGE_fconfig is not set
 # CONFIG_PACKAGE_rbcfg is not set
+# CONFIG_PACKAGE_uboot-envtools is not set
 
 #
 # Compression
@@ -6822,11 +6843,18 @@ CONFIG_PACKAGE_shairplay=m
 # CONFIG_PACKAGE_blkdiscard is not set
 # CONFIG_PACKAGE_blkid is not set
 # CONFIG_PACKAGE_cfdisk is not set
+# CONFIG_PACKAGE_cgdisk is not set
 # CONFIG_PACKAGE_fdisk is not set
 # CONFIG_PACKAGE_findfs is not set
+# CONFIG_PACKAGE_gdisk is not set
+CONFIG_PACKAGE_hd-idle=y
+# CONFIG_PACKAGE_hdparm is not set
 # CONFIG_PACKAGE_lsblk is not set
+# CONFIG_PACKAGE_lvm2 is not set
+# CONFIG_PACKAGE_mdadm is not set
 CONFIG_PACKAGE_partx-utils=y
 # CONFIG_PACKAGE_sfdisk is not set
+# CONFIG_PACKAGE_sgdisk is not set
 # CONFIG_PACKAGE_wipefs is not set
 
 #
@@ -6869,19 +6897,12 @@ CONFIG_PACKAGE_dumpe2fs=m
 CONFIG_PACKAGE_e2fsprogs=y
 # CONFIG_PACKAGE_exfat is not set
 CONFIG_PACKAGE_f2fs-tools=m
-
-#
-# Configuration
-#
-CONFIG_F2FS_UTILS_f2fstat=y
-CONFIG_F2FS_UTILS_fibmap_f2fs=y
-CONFIG_F2FS_UTILS_fsck_f2fs=y
-CONFIG_F2FS_UTILS_dump_f2fs=y
-CONFIG_F2FS_UTILS_mkfs_f2fs=y
+CONFIG_PACKAGE_f2fsck=m
 # CONFIG_PACKAGE_filefrag is not set
 # CONFIG_PACKAGE_fuse-utils is not set
 # CONFIG_PACKAGE_hfsfsck is not set
 # CONFIG_PACKAGE_lsattr is not set
+CONFIG_PACKAGE_mkf2fs=m
 # CONFIG_PACKAGE_mkhfs is not set
 # CONFIG_PACKAGE_ncdu is not set
 CONFIG_PACKAGE_nfs-utils=m
@@ -6903,6 +6924,19 @@ CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE=y
 # CONFIG_PACKAGE_xfs-mkfs is not set
 
 #
+# Image Manipulation
+#
+# CONFIG_PACKAGE_jpeg-tools is not set
+# CONFIG_PACKAGE_tiff-utils is not set
+
+#
+# Microcontroller programming
+#
+# CONFIG_PACKAGE_avrdude is not set
+# CONFIG_PACKAGE_dfu-programmer is not set
+# CONFIG_PACKAGE_stm32flash is not set
+
+#
 # RTKLIB Suite
 #
 # CONFIG_PACKAGE_convbin is not set
@@ -6918,11 +6952,6 @@ CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE=y
 # CONFIG_PACKAGE_klish is not set
 # CONFIG_PACKAGE_tcsh is not set
 # CONFIG_PACKAGE_zsh is not set
-
-#
-# Sound
-#
-# CONFIG_PACKAGE_liblo-utils is not set
 
 #
 # Telephony
@@ -6946,29 +6975,7 @@ CONFIG_PACKAGE_screen=y
 # CONFIG_PACKAGE_wall is not set
 
 #
-# database
-#
-# CONFIG_PACKAGE_mysql-server is not set
-# CONFIG_PACKAGE_pgsql-cli is not set
-# CONFIG_PACKAGE_pgsql-cli-extra is not set
-# CONFIG_PACKAGE_pgsql-server is not set
-# CONFIG_PACKAGE_rrdcgi1 is not set
-CONFIG_PACKAGE_rrdtool1=y
-# CONFIG_PACKAGE_sqlite3-cli is not set
-# CONFIG_PACKAGE_unixodbc-tools is not set
-
-#
-# disc
-#
-# CONFIG_PACKAGE_cgdisk is not set
-# CONFIG_PACKAGE_gdisk is not set
-CONFIG_PACKAGE_hd-idle=y
-# CONFIG_PACKAGE_hdparm is not set
-# CONFIG_PACKAGE_lvm2 is not set
-# CONFIG_PACKAGE_sgdisk is not set
-
-#
-# zoneinfo
+# Zoneinfo
 #
 # CONFIG_PACKAGE_zoneinfo-africa is not set
 # CONFIG_PACKAGE_zoneinfo-asia is not set
@@ -6982,9 +6989,20 @@ CONFIG_PACKAGE_zoneinfo-core=m
 # CONFIG_PACKAGE_zoneinfo-poles is not set
 # CONFIG_PACKAGE_zoneinfo-simple is not set
 # CONFIG_PACKAGE_zoneinfo-southamerica is not set
+
+#
+# database
+#
+# CONFIG_PACKAGE_mysql-server is not set
+# CONFIG_PACKAGE_pgsql-cli is not set
+# CONFIG_PACKAGE_pgsql-cli-extra is not set
+# CONFIG_PACKAGE_pgsql-server is not set
+# CONFIG_PACKAGE_rrdcgi1 is not set
+CONFIG_PACKAGE_rrdtool1=y
+# CONFIG_PACKAGE_sqlite3-cli is not set
+# CONFIG_PACKAGE_unixodbc-tools is not set
 # CONFIG_PACKAGE_ap51-flash is not set
 # CONFIG_PACKAGE_at is not set
-# CONFIG_PACKAGE_avrdude is not set
 # CONFIG_PACKAGE_bandwidthd is not set
 # CONFIG_PACKAGE_bandwidthd-pgsql is not set
 # CONFIG_PACKAGE_bandwidthd-php is not set
@@ -7001,9 +7019,6 @@ CONFIG_PACKAGE_zoneinfo-core=m
 # CONFIG_PACKAGE_canutils is not set
 # CONFIG_PACKAGE_cmdpad is not set
 # CONFIG_PACKAGE_collectd is not set
-CONFIG_PACKAGE_comgt=m
-# CONFIG_PACKAGE_comgt-directip is not set
-# CONFIG_PACKAGE_comgt-ncm is not set
 CONFIG_PACKAGE_coreutils=m
 # CONFIG_PACKAGE_coreutils-base64 is not set
 # CONFIG_PACKAGE_coreutils-basename is not set
@@ -7110,7 +7125,6 @@ CONFIG_PACKAGE_cpulimit-ng=m
 # CONFIG_PACKAGE_ct-bugcheck is not set
 CONFIG_PACKAGE_dbus=y
 # CONFIG_PACKAGE_dbus-utils is not set
-# CONFIG_PACKAGE_dfu-programmer is not set
 # CONFIG_PACKAGE_dmesg is not set
 # CONFIG_PACKAGE_dropbearconvert is not set
 CONFIG_PACKAGE_dtach=y
@@ -7143,7 +7157,6 @@ CONFIG_PACKAGE_dtach=y
 # CONFIG_PACKAGE_iconv is not set
 # CONFIG_PACKAGE_iwcap is not set
 # CONFIG_PACKAGE_iwinfo is not set
-# CONFIG_PACKAGE_jpeg-tools is not set
 CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_kmod is not set
 # CONFIG_PACKAGE_lcd4linux-custom is not set
@@ -7169,7 +7182,6 @@ CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_mbtools is not set
 # CONFIG_PACKAGE_mc is not set
 # CONFIG_PACKAGE_mcookie is not set
-# CONFIG_PACKAGE_mdadm is not set
 # CONFIG_PACKAGE_mmc-utils is not set
 # CONFIG_PACKAGE_mount-utils is not set
 # CONFIG_PACKAGE_mountd is not set
@@ -7248,7 +7260,6 @@ CONFIG_PACKAGE_shellsync=y
 # CONFIG_PACKAGE_sockread is not set
 # CONFIG_PACKAGE_spi-tools is not set
 # CONFIG_PACKAGE_spidev-test is not set
-# CONFIG_PACKAGE_stm32flash is not set
 # CONFIG_PACKAGE_strace is not set
 # CONFIG_PACKAGE_strace_libunwind is not set
 # CONFIG_PACKAGE_stress is not set
@@ -7256,11 +7267,9 @@ CONFIG_PACKAGE_shellsync=y
 # CONFIG_PACKAGE_sysstat is not set
 # CONFIG_PACKAGE_tar is not set
 # CONFIG_PACKAGE_taskwarrior is not set
-# CONFIG_PACKAGE_tiff-utils is not set
 # CONFIG_PACKAGE_tracertools is not set
 # CONFIG_PACKAGE_triggerhappy is not set
 CONFIG_PACKAGE_ubi-utils=y
-# CONFIG_PACKAGE_uboot-envtools is not set
 # CONFIG_PACKAGE_ugps is not set
 # CONFIG_PACKAGE_uksmtools is not set
 # CONFIG_PACKAGE_usb-modeswitch is not set
@@ -7287,4 +7296,3 @@ CONFIG_PACKAGE_watchcat=y
 # font-utils
 #
 # CONFIG_PACKAGE_fontconfig is not set
-CONFIG_OVERRIDE_PKGS="f2fs-tools"
