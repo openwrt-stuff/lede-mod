@@ -32,8 +32,8 @@ diff -Naur a/feeds/luci/applications/luci-app-hd-idle/luasrc/controller/hd_idle.
  
  	local page
  
--	page = entry({"admin", "services", "hd_idle"}, cbi("hd_idle"), _("hd-idle"), 60)
-+	page = entry({"admin", "system", "hd_idle"}, cbi("hd_idle"), _("hd-idle"), 60)
+-	page = entry({"admin", "services", "hd_idle"}, cbi("hd_idle"), _("HDD Idle"), 60)
++	page = entry({"admin", "system", "hd_idle"}, cbi("hd_idle"), _("HDD Idle"), 60)
  	page.dependent = true
  end
 diff -Naur a/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua b/feeds/luci/applications/luci-app-minidlna/luasrc/controller/minidlna.lua

@@ -1,0 +1,11 @@
+diff -Naur a/kernel/sched/bfs.c b/kernel/sched/bfs.c
+--- a/kernel/sched/bfs.c	2016-09-14 12:20:42.000000000 +0800
++++ b/kernel/sched/bfs.c	2016-09-14 18:00:21.134879567 +0800
+@@ -1643,6 +1643,7 @@
+ {
+ 	return try_to_wake_up(p, state, 0);
+ }
++EXPORT_SYMBOL(wake_up_state);
+ 
+ static void time_slice_expired(struct task_struct *p);
+ 

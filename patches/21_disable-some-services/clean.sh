@@ -15,3 +15,8 @@ rm_lock
 cd $basedir/feeds/luci/applications/luci-app-p2pblock/root/etc/uci-defaults/
 rm -f *
 git checkout .
+
+rm_lock
+cd $basedir/feeds/packages/utils/watchcat/
+rm -f Makefile
+git checkout .

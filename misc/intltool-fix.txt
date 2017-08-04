@@ -1,0 +1,3 @@
+staging_dir/target-*/host/bin/intltool
+
+https://github.com/Alexpux/MSYS2-packages/blob/master/intltool/perl-5.22-compatibility.patch

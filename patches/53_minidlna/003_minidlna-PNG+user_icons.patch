@@ -1,34 +1,6 @@
-diff -Naur minidlna-1.1.4/Makefile.am minidlna-PNG+user_icons/Makefile.am
---- minidlna-1.1.4/Makefile.am	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/Makefile.am	2015-02-02 22:41:16.000000000 -0600
-@@ -15,13 +15,14 @@
- # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- # USA.
- 
--AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@
-+AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@ \
-+	    @libpng_CFLAGS@
- 
- SUBDIRS=po
- 
- sbin_PROGRAMS = minidlnad
- check_PROGRAMS = testupnpdescgen
--minidlnad_SOURCES = minidlna.c upnphttp.c upnpdescgen.c upnpsoap.c \
-+minidlnad_SOURCES = minidlna.c icons.c upnphttp.c upnpdescgen.c upnpsoap.c \
- 			upnpreplyparse.c minixml.c clients.c \
- 			getifaddr.c process.c upnpglobalvars.c \
- 			options.c minissdp.c uuid.c upnpevents.c \
-@@ -40,6 +41,7 @@
- 
- minidlnad_LDADD = \
- 	@LIBJPEG_LIBS@ \
-+	@libpng_LIBS@ \
- 	@LIBID3TAG_LIBS@ \
- 	@LIBSQLITE3_LIBS@ \
- 	@LIBAVFORMAT_LIBS@ \
-diff -Naur minidlna-1.1.4/configure.ac minidlna-PNG+user_icons/configure.ac
---- minidlna-1.1.4/configure.ac	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/configure.ac	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2017-05-17 20:55:17.000000000 +0000
++++ b/configure.ac	2017-08-02 01:22:45.318713548 +0000
 @@ -405,6 +405,11 @@
  test x"$ac_cv_lib_jpeg_jpeg_set_defaults" = x"yes" || AC_MSG_ERROR([Could not find libexif])
  AC_SUBST(LIBEXIF_LIBS)
@@ -41,9 +13,9 @@ diff -Naur minidlna-1.1.4/configure.ac minidlna-PNG+user_icons/configure.ac
  LDFLAGS_SAVE="$LDFLAGS"
  for dir in "" /usr/local $SEARCH_DIR; do
      if test -n "$dir"; then
-diff -Naur minidlna-1.1.4/icons.c minidlna-PNG+user_icons/icons.c
---- minidlna-1.1.4/icons.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/icons.c	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/icons.c b/icons.c
+--- a/icons.c	2017-05-17 20:55:17.000000000 +0000
++++ b/icons.c	2017-08-02 01:22:45.322046849 +0000
 @@ -18,6 +18,8 @@
   * along with MiniDLNA. If not, see <http://www.gnu.org/licenses/>.
   */
@@ -64,9 +36,9 @@ diff -Naur minidlna-1.1.4/icons.c minidlna-PNG+user_icons/icons.c
 +		sizeof (jpeg_lrg)-1, sizeof (jpeg_sm)-1 },
 +	{ 0, 0, 0, 0 }
 +};
-diff -Naur minidlna-1.1.4/icons.h minidlna-PNG+user_icons/icons.h
---- minidlna-1.1.4/icons.h	1969-12-31 18:00:00.000000000 -0600
-+++ minidlna-PNG+user_icons/icons.h	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/icons.h b/icons.h
+--- a/icons.h	1970-01-01 00:00:00.000000000 +0000
++++ b/icons.h	2017-08-02 01:22:45.325380149 +0000
 @@ -0,0 +1,24 @@
 +#ifndef __ICONS_H__
 +#define __ICONG_H__
@@ -92,9 +64,9 @@ diff -Naur minidlna-1.1.4/icons.h minidlna-PNG+user_icons/icons.h
 +extern struct icon_struct icons;
 +
 +#endif
-diff -Naur minidlna-1.1.4/image_utils.c minidlna-PNG+user_icons/image_utils.c
---- minidlna-1.1.4/image_utils.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/image_utils.c	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/image_utils.c b/image_utils.c
+--- a/image_utils.c	2017-05-17 20:55:17.000000000 +0000
++++ b/image_utils.c	2017-08-02 01:22:45.325380149 +0000
 @@ -31,7 +31,14 @@
  #include <stdlib.h>
  #include <string.h>
@@ -110,7 +82,7 @@ diff -Naur minidlna-1.1.4/image_utils.c minidlna-PNG+user_icons/image_utils.c
  #include <jpeglib.h>
  #ifdef HAVE_MACHINE_ENDIAN_H
  #include <machine/endian.h>
-@@ -562,6 +569,358 @@
+@@ -573,6 +580,358 @@
  	return vimage;
  }
  
@@ -469,9 +441,9 @@ diff -Naur minidlna-1.1.4/image_utils.c minidlna-PNG+user_icons/image_utils.c
  void
  image_upsize(image_s * pdest, image_s * psrc, int32_t width, int32_t height)
  {
-diff -Naur minidlna-1.1.4/image_utils.h minidlna-PNG+user_icons/image_utils.h
---- minidlna-1.1.4/image_utils.h	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/image_utils.h	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/image_utils.h b/image_utils.h
+--- a/image_utils.h	2017-05-17 20:55:17.000000000 +0000
++++ b/image_utils.h	2017-08-02 01:22:45.325380149 +0000
 @@ -28,6 +28,11 @@
  #define ROTATE_180  0x2
  #define ROTATE_270  0x4
@@ -516,10 +488,33 @@ diff -Naur minidlna-1.1.4/image_utils.h minidlna-PNG+user_icons/image_utils.h
 +void
 +image_bgcolor_composite (image_s *img, uint32_t bgcolor);
 +
-diff -Naur minidlna-1.1.4/metadata.c minidlna-PNG+user_icons/metadata.c
---- minidlna-1.1.4/metadata.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/metadata.c	2015-02-02 22:41:16.000000000 -0600
-@@ -482,8 +482,8 @@
+diff -Naur a/Makefile.am b/Makefile.am
+--- a/Makefile.am	2017-05-17 20:55:17.000000000 +0000
++++ b/Makefile.am	2017-08-02 01:23:43.000000000 +0000
+@@ -17,9 +17,9 @@
+ 
+-AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@
++AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @STATIC_CFLAGS@ @libpng_CFLAGS@
+ 
+ SUBDIRS=
+ 
+ sbin_PROGRAMS = minidlnad
+ check_PROGRAMS = testupnpdescgen
+-minidlnad_SOURCES = minidlna.c upnphttp.c upnpdescgen.c upnpsoap.c \
++minidlnad_SOURCES = minidlna.c icons.c upnphttp.c upnpdescgen.c upnpsoap.c \
+ 			upnpreplyparse.c minixml.c clients.c \
+@@ -46,6 +46,7 @@
+ 
+ minidlnad_LDADD = \
+ 	@LIBJPEG_LIBS@ \
++	@libpng_LIBS@ \
+ 	@LIBID3TAG_LIBS@ \
+ 	@LIBSQLITE3_LIBS@ \
+ 	@LIBAVFORMAT_LIBS@ \
+diff -Naur a/metadata.c b/metadata.c
+--- a/metadata.c	2017-05-17 20:55:17.000000000 +0000
++++ b/metadata.c	2017-08-02 01:22:45.325380149 +0000
+@@ -492,8 +492,8 @@
  	return;
  }
  
@@ -530,7 +525,7 @@ diff -Naur minidlna-1.1.4/metadata.c minidlna-PNG+user_icons/metadata.c
  {
  	ExifData *ed;
  	ExifEntry *e = NULL;
-@@ -651,6 +651,294 @@
+@@ -661,6 +661,294 @@
  	return ret;
  }
  
@@ -825,19 +820,19 @@ diff -Naur minidlna-1.1.4/metadata.c minidlna-PNG+user_icons/metadata.c
  int64_t
  GetVideoMetadata(const char *path, char *name)
  {
-diff -Naur minidlna-1.1.4/minidlna.c minidlna-PNG+user_icons/minidlna.c
---- minidlna-1.1.4/minidlna.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/minidlna.c	2015-02-02 22:41:16.000000000 -0600
-@@ -94,6 +94,8 @@
- #include "log.h"
+diff -Naur a/minidlna.c b/minidlna.c
+--- a/minidlna.c	2017-05-17 20:55:17.000000000 +0000
++++ b/minidlna.c	2017-08-02 01:22:45.325380149 +0000
+@@ -95,6 +95,8 @@
  #include "tivo_beacon.h"
  #include "tivo_utils.h"
+ #include "avahi.h"
 +#include "icons.h"
 +#include "image_utils.h"
  
  #if SQLITE_VERSION_NUMBER < 3005001
  # warning "Your SQLite3 library appears to be too old!  Please use 3.5.1 or newer."
-@@ -278,6 +280,166 @@
+@@ -255,6 +257,166 @@
  #endif
  }
  
@@ -1004,9 +999,9 @@ diff -Naur minidlna-1.1.4/minidlna.c minidlna-PNG+user_icons/minidlna.c
  static int
  open_db(sqlite3 **sq3)
  {
-@@ -734,6 +896,34 @@
- 			if (strtobool(ary_options[i].value))
- 				SETFLAG(MERGE_MEDIA_DIRS_MASK);
+@@ -739,6 +901,34 @@
+ 			if (strcasecmp(ary_options[i].value, "beacon") == 0)
+ 				CLEARFLAG(TIVO_BONJOUR_MASK);
  			break;
 +		case PNG_ICON_SM:
 +			set_user_icon (ICON_PNG_SM, ary_options[i].value);
@@ -1039,15 +1034,13 @@ diff -Naur minidlna-1.1.4/minidlna.c minidlna-PNG+user_icons/minidlna.c
  		default:
  			DPRINTF(E_ERROR, L_GENERAL, "Unknown option in file %s\n",
  				optionsfile);
-diff -Naur minidlna-1.1.4/options.c minidlna-PNG+user_icons/options.c
---- minidlna-1.1.4/options.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/options.c	2015-02-02 22:41:16.000000000 -0600
-@@ -64,7 +64,14 @@
- 	{ USER_ACCOUNT, "user" },
- 	{ FORCE_SORT_CRITERIA, "force_sort_criteria" },
- 	{ MAX_CONNECTIONS, "max_connections" },
--	{ MERGE_MEDIA_DIRS, "merge_media_dirs" }
-+	{ MERGE_MEDIA_DIRS, "merge_media_dirs" },
+diff -Naur a/options.c b/options.c
+--- a/options.c	2017-05-17 20:55:17.000000000 +0000
++++ b/options.c	2017-08-02 01:26:03.000000000 +0000
+@@ -67,6 +67,13 @@
+ 	{ MERGE_MEDIA_DIRS, "merge_media_dirs" },
+ 	{ WIDE_LINKS, "wide_links" },
+ 	{ TIVO_DISCOVERY, "tivo_discovery" },
 +#ifdef HAVE_LIBPNG
 +	{ ICON, "icon" },
 +#endif
@@ -1058,15 +1051,13 @@ diff -Naur minidlna-1.1.4/options.c minidlna-PNG+user_icons/options.c
  };
  
  int
-diff -Naur minidlna-1.1.4/options.h minidlna-PNG+user_icons/options.h
---- minidlna-1.1.4/options.h	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/options.h	2015-02-02 22:41:16.000000000 -0600
-@@ -57,7 +57,15 @@
- 	USER_ACCOUNT,			/* user account to run as */
- 	FORCE_SORT_CRITERIA,		/* force sorting by a given sort criteria */
- 	MAX_CONNECTIONS,		/* maximum number of simultaneous connections */
--	MERGE_MEDIA_DIRS		/* don't add an extra directory level when there are multiple media dirs */
-+	MERGE_MEDIA_DIRS,		/* don't add an extra directory level when there are multiple media dirs */
+diff -Naur a/options.h b/options.h
+--- a/options.h	2017-05-17 20:55:17.000000000 +0000
++++ b/options.h	2017-08-02 01:26:57.000000000 +0000
+@@ -60,6 +60,14 @@
+ 	MERGE_MEDIA_DIRS,		/* don't add an extra directory level when there are multiple media dirs */
+ 	WIDE_LINKS,			/* allow following symlinks outside the defined media_dirs */
+ 	TIVO_DISCOVERY,			/* TiVo discovery protocol: bonjour or beacon. Defaults to bonjour if supported */
 +	/* user-supplied icons */
 +	PNG_ICON_SM,
 +	PNG_ICON_LRG,
@@ -1078,9 +1069,9 @@ diff -Naur minidlna-1.1.4/options.h minidlna-PNG+user_icons/options.h
  };
  
  /* readoptionsfile()
-diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
---- minidlna-1.1.4/upnphttp.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/upnphttp.c	2015-02-02 22:41:16.000000000 -0600
+diff -Naur a/upnphttp.c b/upnphttp.c
+--- a/upnphttp.c	2017-05-17 20:55:17.000000000 +0000
++++ b/upnphttp.c	2017-08-02 01:22:45.325380149 +0000
 @@ -81,14 +81,13 @@
  #include "clients.h"
  #include "process.h"
@@ -1097,7 +1088,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  enum event_type {
  	E_INVALID,
  	E_SUBSCRIBE,
-@@ -1340,29 +1339,29 @@
+@@ -1389,29 +1388,29 @@
  	if( strcmp(icon, "sm.png") == 0 )
  	{
  		DPRINTF(E_DEBUG, L_HTTP, "Sending small PNG icon\n");
@@ -1135,7 +1126,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  		strcpy(mime+6, "jpeg");
  	}
  	else
-@@ -1576,8 +1575,10 @@
+@@ -1628,8 +1627,10 @@
  	int scale = 1;
  	const char *tmode;
  
@@ -1147,7 +1138,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  	ret = sql_get_table(db, buf, &result, &rows, NULL);
  	if( ret != SQLITE_OK )
  	{
-@@ -1586,9 +1587,9 @@
+@@ -1638,9 +1639,9 @@
  	}
  	if( rows )
  	{
@@ -1160,7 +1151,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  	}
  	if( !file_path || !resolution || (access(file_path, F_OK) != 0) )
  	{
-@@ -1598,6 +1599,20 @@
+@@ -1650,6 +1651,20 @@
  		return;
  	}
  
@@ -1181,7 +1172,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  	if( saveptr )
  		saveptr = strchr(saveptr, '?');
  	path = saveptr ? saveptr + 1 : object;
-@@ -1710,7 +1725,12 @@
+@@ -1773,7 +1788,12 @@
  	if( strcmp(h->HttpVer, "HTTP/1.0") == 0 )
  	{
  		chunked = 0;
@@ -1195,7 +1186,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  	}
  	else
  	{
-@@ -1728,6 +1748,10 @@
+@@ -1791,6 +1811,10 @@
  		}
  
  		imdst = image_resize(imsrc, dstw, dsth);
@@ -1206,7 +1197,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  		data = image_save_to_jpeg_buf(imdst, &size);
  
  		strcatf(&str, "Content-Length: %d\r\n\r\n", size);
-@@ -1737,7 +1761,12 @@
+@@ -1800,7 +1824,12 @@
  	{
  		if( chunked )
  		{
@@ -1220,7 +1211,7 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  			if( !imsrc )
  			{
  				DPRINTF(E_WARN, L_HTTP, "Unable to open image %s!\n", file_path);
-@@ -1745,6 +1774,10 @@
+@@ -1808,6 +1837,10 @@
  				goto resized_error;
  			}
  			imdst = image_resize(imsrc, dstw, dsth);
@@ -1231,10 +1222,10 @@ diff -Naur minidlna-1.1.4/upnphttp.c minidlna-PNG+user_icons/upnphttp.c
  			data = image_save_to_jpeg_buf(imdst, &size);
  
  			ret = sprintf(buf, "%x\r\n", size);
-diff -Naur minidlna-1.1.4/utils.c minidlna-PNG+user_icons/utils.c
---- minidlna-1.1.4/utils.c	2014-08-26 16:09:22.000000000 -0500
-+++ minidlna-PNG+user_icons/utils.c	2015-02-02 22:41:16.000000000 -0600
-@@ -402,7 +402,8 @@
+diff -Naur a/utils.c b/utils.c
+--- a/utils.c	2017-05-17 20:55:17.000000000 +0000
++++ b/utils.c	2017-08-02 01:22:45.328713449 +0000
+@@ -418,7 +418,8 @@
  int
  is_image(const char * file)
  {

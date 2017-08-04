@@ -10,11 +10,15 @@ cd  $BUILDROOT
 
 ls $BASEDIR/patches/*/clean.sh | while read line
 do
+  echo "================="
+  echo "Executing ${line}"
 	bash ${line}
 done
 
 ls $BASEDIR/patches/*/install.sh | while read line
 do
+  echo "================="
+  echo "Executing ${line}"
 	bash ${line}
 done
 

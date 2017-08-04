@@ -8,8 +8,12 @@ cd $basedir
 #patch -p1 < $patchdir/linux-config-3.18.patch
 #patch -p1 < $patchdir/linux-config-4.1.patch
 cp $patchdir/300-imq.patch $basedir/package/network/utils/iptables/patches/
-cp $patchdir/3.18/690-imq.patch $basedir/target/linux/generic/patches-3.18/
-cp $patchdir/4.4/690-imq.patch $basedir/target/linux/generic/patches-4.4/
+
+ls $patchdir | grep -P "^\d\.\d+$" | while read KVER
+do
+    cp $patchdir/${KVER}/* \
+        $basedir/target/linux/generic/patches-${KVER}/
+done
 
 #rm -f include/netfilter.mk.rej package/kernel/linux/modules/netfilter.mk.rej package/network/utils/iptables/Makefile.rej target/linux/generic/config-3.18.rej target/linux/generic/config-4.1.rej
 

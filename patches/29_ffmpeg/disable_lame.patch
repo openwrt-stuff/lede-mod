@@ -1,13 +1,14 @@
 diff -Naur a/feeds/packages/multimedia/ffmpeg/Makefile b/feeds/packages/multimedia/ffmpeg/Makefile
 --- a/feeds/packages/multimedia/ffmpeg/Makefile	2016-10-11 08:08:28.000000000 +0800
 +++ b/feeds/packages/multimedia/ffmpeg/Makefile	2016-10-10 21:39:41.000000000 +0800
-@@ -293,8 +293,10 @@
+@@ -297,9 +297,12 @@
  $(call Package/libffmpeg/Default)
   TITLE+= (custom)
-  DEPENDS+= +FFMPEG_CUSTOM_SELECT_libopus:libopus +FFMPEG_CUSTOM_SELECT_speex:libspeex \
--           +PACKAGE_libx264:libx264 +PACKAGE_lame-lib:lame-lib
--
-+           +PACKAGE_libx264:libx264
+  DEPENDS+= +FFMPEG_CUSTOM_SELECT_libopus:libopus \
+-           +PACKAGE_libx264:libx264 +PACKAGE_lame-lib:lame-lib \
++           +PACKAGE_libx264:libx264 \
+            +FFMPEG_CUSTOM_SELECT_libshine:shine \
+            +PACKAGE_fdk-aac:fdk-aac
 +ifeq ($(CONFIG_FFMPEG_CUSTOM_SELECT_mp3lame),y)
 + DEPENDS+=+lame-lib
 +endif

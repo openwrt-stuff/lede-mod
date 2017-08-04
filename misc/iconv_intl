@@ -17,15 +17,15 @@ feeds/packages/net/tcpreplay
 
 package/utils/util-linux/ blkdiscard blkid cfdisk dmesg fdisk flock logger losetup lsblk sfdisk mount-utils partx-utils swap-utils whereis wipefs findfs getopt
 
+feeds/packages/utils/bash
+
 feeds/packages/utils/grep
-    
-feeds/packages/utils/nano
     
 feeds/packages/utils/gnupg
     
+feeds/packages/utils/nano
+    
 feeds/packages/utils/tar
-
-feeds/packages/utils/bash
 
 feeds/packages/libs/gnutls
 

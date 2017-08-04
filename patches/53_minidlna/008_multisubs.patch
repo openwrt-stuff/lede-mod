@@ -1,7 +1,7 @@
-diff -u a/clients.c b/clients.c
---- a/clients.c
-+++ b/clients.c
-@@ -96,7 +96,7 @@
+diff -Naur a/clients.c b/clients.c
+--- a/clients.c	2017-05-17 20:55:17.000000000 +0000
++++ b/clients.c	2017-08-02 01:05:23.475694563 +0000
+@@ -114,7 +114,7 @@
  
  	/* User-Agent: IPI/1.0 UPnP/1.0 DLNADOC/1.50 */
  	{ ENetFrontLivingConnect,
@@ -10,7 +10,7 @@ diff -u a/clients.c b/clients.c
  	  "NetFront Living Connect",
  	  "IPI/1",
  	  EUserAgent
-@@ -136,7 +136,7 @@
+@@ -162,7 +162,7 @@
  
  	/* User-Agent: Linux/2.6.31-1.0 UPnP/1.0 DLNADOC/1.50 INTEL_NMPR/2.0 LGE_DLNA_SDK/1.5.0 */
  	{ ELGDevice,
@@ -19,7 +19,7 @@ diff -u a/clients.c b/clients.c
  	  "LG",
  	  "LGE_DLNA_SDK",
  	  EUserAgent
-@@ -208,14 +208,14 @@
+@@ -241,14 +241,14 @@
  	},
  
  	{ EAsusOPlay,
@@ -36,39 +36,20 @@ diff -u a/clients.c b/clients.c
  	  "BubbleUPnP",
  	  "BubbleUPnP",
  	  EUserAgent
-diff -u a/clients.h b/clients.h
---- a/clients.h
-+++ b/clients.h
+diff -Naur a/clients.h b/clients.h
+--- a/clients.h	2017-05-17 20:55:17.000000000 +0000
++++ b/clients.h	2017-08-02 01:10:30.000000000 +0000
 @@ -37,6 +37,7 @@
  #define FLAG_AUDIO_ONLY         0x00000400
  #define FLAG_FORCE_SORT         0x00000800
  #define FLAG_CAPTION_RES        0x00001000
 +#define FLAG_MULTI_CAPTION_RES  0x00002000
+ #define FLAG_SKIP_DLNA_PN       0x00002000 /* during browsing */
  /* Response-related flags */
  #define FLAG_HAS_CAPTIONS       0x80000000
- 
-diff -u a/inotify.c b/inotify.c
---- a/inotify.c
-+++ b/inotify.c
-@@ -598,6 +598,7 @@
- 		/* Now delete the actual objects */
- 		sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
- 		sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);
-+		sql_exec(db, "DELETE from CAPTIONS where DETAIL_ID = %lld", detailID);
- 	}
- 	snprintf(art_cache, sizeof(art_cache), "%s/art_cache%s", db_path, path);
- 	remove(art_cache);
-@@ -627,6 +628,7 @@
- 				detailID = strtoll(result[i], NULL, 10);
- 				sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
- 				sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);
-+		    sql_exec(db, "DELETE from CAPTIONS where DETAIL_ID = %lld", detailID);
- 			}
- 			ret = 0;
- 		}
-diff -u a/metadata.c b/metadata.c
---- a/metadata.c
-+++ b/metadata.c
+diff -Naur a/metadata.c b/metadata.c
+--- a/metadata.c	2017-05-17 20:55:17.000000000 +0000
++++ b/metadata.c	2017-08-02 01:09:53.000000000 +0000
 @@ -56,6 +56,12 @@
  #define FLAG_DURATION	0x00000200
  #define FLAG_RESOLUTION	0x00000400
@@ -82,7 +63,7 @@ diff -u a/metadata.c b/metadata.c
  /* Audio profile flags */
  enum audio_profiles {
  	PROFILE_AUDIO_UNKNOWN,
-@@ -115,45 +121,70 @@
+@@ -115,45 +121,68 @@
  	return 0;
  }
  
@@ -119,7 +100,6 @@ diff -u a/metadata.c b/metadata.c
 -			//DPRINTF(E_MAXDEBUG, L_METADATA, "No file found for caption %s.\n", path);
 +		if (sql_get_int_field(db, "SELECT 1 FROM captions WHERE path = %Q", path) == 1)
  			return;
-+
 +		strcpy(buf, path);
 +		for (i = 0; i < 2 && !detailID; i++)
 +		{
@@ -128,7 +108,6 @@ diff -u a/metadata.c b/metadata.c
 +				break;
 +			detailID = sql_get_int64_field(db, "SELECT id FROM details WHERE (path > '%q.' AND path <= '%q.z') AND mime like 'video/%%' LIMIT 1", buf);
  		}
--	}
 +		if (detailID)
 +		{
 +			subid = sql_get_int_field(db, "SELECT MAX(sub_id) FROM captions WHERE detail_id = %lld", detailID);
@@ -136,18 +115,19 @@ diff -u a/metadata.c b/metadata.c
 +				subid = 1;
 +			else	
 +				subid++;
- 
++			DPRINTF(E_DEBUG, L_METADATA, "Caption found [%lld,%d] %s\n", (long long) detailID, subid, path);
++			sql_exec(db, "INSERT INTO captions (detail_id, sub_id, path) VALUES (%lld, %d, %Q)", (long long) detailID, subid, path);
++		}
++		return;
+ 	}
+-
 -	strcpy(p, ".srt");
 -	ret = access(file, R_OK);
 -	if (ret != 0)
 -	{
 -		strcpy(p, ".smi");
 -		ret = access(file, R_OK);
-+			DPRINTF(E_DEBUG, L_METADATA, "Caption found [%lld,%d] %s\n", (long long) detailID, subid, path);
-+			sql_exec(db, "INSERT INTO captions (detail_id, sub_id, path) VALUES (%lld, %d, %Q)", (long long) detailID, subid, path);
-+		}
-+		return;
- 	}
+-	}
 -
 -	if (ret == 0)
 +  /* from scanner */
@@ -161,7 +141,7 @@ diff -u a/metadata.c b/metadata.c
 +	n = scandir(dir, &namelist, filter_caption, alphasort);
 +	for (i = 0; i < n; i++)
  	{
--		sql_exec(db, "INSERT into CAPTIONS"
+-		sql_exec(db, "INSERT OR REPLACE into CAPTIONS"
 -		             " (ID, PATH) "
 -		             "VALUES"
 -		             " (%lld, %Q)", detailID, file);
@@ -181,11 +161,30 @@ diff -u a/metadata.c b/metadata.c
  }
  
  void
-diff -u a/scanner_sqlite.h b/scanner_sqlite.h
---- a/scanner_sqlite.h
-+++ b/scanner_sqlite.h
-@@ -62,7 +62,8 @@
-                                         ");";
+diff -Naur a/monitor.c b/monitor.c
+--- a/monitor.c	2017-05-17 20:55:17.000000000 +0000
++++ b/monitor.c	2017-08-02 01:05:32.565604572 +0000
+@@ -320,6 +320,7 @@
+ 		/* Now delete the actual objects */
+ 		sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
+ 		sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);
++		sql_exec(db, "DELETE from CAPTIONS where DETAIL_ID = %lld", detailID);
+ 	}
+ 	snprintf(art_cache, sizeof(art_cache), "%s/art_cache%s", db_path, path);
+ 	remove(art_cache);
+@@ -619,6 +620,7 @@
+ 				detailID = strtoll(result[i], NULL, 10);
+ 				sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
+ 				sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);
++		    sql_exec(db, "DELETE from CAPTIONS where DETAIL_ID = %lld", detailID);
+ 			}
+ 			ret = 0;
+ 		}
+diff -Naur a/scanner_sqlite.h b/scanner_sqlite.h
+--- a/scanner_sqlite.h	2017-05-17 20:55:17.000000000 +0000
++++ b/scanner_sqlite.h	2017-08-02 01:05:32.565604572 +0000
+@@ -64,7 +64,8 @@
+ 					");";
  
  char create_captionTable_sqlite[] = "CREATE TABLE CAPTIONS ("
 -					"ID INTEGER PRIMARY KEY, "
@@ -194,10 +193,10 @@ diff -u a/scanner_sqlite.h b/scanner_sqlite.h
  					"PATH TEXT NOT NULL"
  					");";
  
-diff -u a/upnphttp.c b/upnphttp.c
---- a/upnphttp.c
-+++ b/upnphttp.c
-@@ -1213,7 +1213,7 @@
+diff -Naur a/upnphttp.c b/upnphttp.c
+--- a/upnphttp.c	2017-05-17 20:55:17.000000000 +0000
++++ b/upnphttp.c	2017-08-02 01:05:32.565604572 +0000
+@@ -1222,7 +1222,7 @@
  SendResp_upnphttp(struct upnphttp * h)
  {
  	int n;
@@ -206,7 +205,7 @@ diff -u a/upnphttp.c b/upnphttp.c
  	n = send(h->socket, h->res_buf, h->res_buflen, 0);
  	if(n<0)
  	{
-@@ -1449,17 +1449,25 @@
+@@ -1500,17 +1500,25 @@
  	long long id;
  	int fd;
  	struct string_s str;
@@ -233,9 +232,9 @@ diff -u a/upnphttp.c b/upnphttp.c
 -	DPRINTF(E_INFO, L_HTTP, "Serving caption ID: %lld [%s]\n", id, path);
 +	DPRINTF(E_INFO, L_HTTP, "Serving caption ID: [%lld,%d] [%s]\n", id, subid, path);
  
- 	fd = open(path, O_RDONLY);
+ 	fd = _open_file(path);
  	if( fd < 0 ) {
-@@ -1977,7 +1985,7 @@
+@@ -2040,7 +2048,7 @@
  
  	if( h->reqflags & FLAG_CAPTION )
  	{
@@ -244,10 +243,10 @@ diff -u a/upnphttp.c b/upnphttp.c
  			strcatf(&str, "CaptionInfo.sec: http://%s:%d/Captions/%lld.srt\r\n",
  			              lan_addr[h->iface].str, runtime_vars.port, (long long)id);
  	}
-diff -u a/upnpsoap.c b/upnpsoap.c
---- a/upnpsoap.c
-+++ b/upnpsoap.c
-@@ -662,6 +662,32 @@
+diff -Naur a/upnpsoap.c b/upnpsoap.c
+--- a/upnpsoap.c	2017-05-17 20:55:17.000000000 +0000
++++ b/upnpsoap.c	2017-08-02 01:05:32.565604572 +0000
+@@ -678,6 +678,32 @@
  	return order;
  }
  
@@ -280,7 +279,7 @@ diff -u a/upnpsoap.c b/upnpsoap.c
  inline static void
  add_resized_res(int srcw, int srch, int reqw, int reqh, char *dlna_pn,
                  char *detailID, struct Response *args)
-@@ -853,10 +879,10 @@
+@@ -870,10 +896,10 @@
  					strcpy(mime+6, "mpeg");
  				}
  			}
@@ -293,7 +292,7 @@ diff -u a/upnpsoap.c b/upnpsoap.c
  					passed_args->flags |= FLAG_HAS_CAPTIONS;
  			}
  			/* From what I read, Samsung TV's expect a [wrong] MIME type of x-mkv. */
-@@ -1058,7 +1084,9 @@
+@@ -1103,7 +1129,9 @@
  				default:
  					if( passed_args->flags & FLAG_HAS_CAPTIONS )
  					{
@@ -304,9 +303,10 @@ diff -u a/upnpsoap.c b/upnpsoap.c
  							ret = strcatf(str, "&lt;res protocolInfo=\"http-get:*:text/srt:*\"&gt;"
  									     "http://%s:%d/Captions/%s.srt"
  									   "&lt;/res&gt;",
---- a/utils.c	2016-10-11 13:45:01.000000000 +0800
-+++ b/utils.c	2016-10-11 13:53:42.628934238 +0800
-@@ -447,7 +447,8 @@
+diff -Naur a/utils.c b/utils.c
+--- a/utils.c	2017-05-17 20:55:17.000000000 +0000
++++ b/utils.c	2017-08-02 01:05:32.565604572 +0000
+@@ -430,7 +430,8 @@
  int
  is_caption(const char * file)
  {

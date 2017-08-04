@@ -1530,7 +1530,7 @@
 +
 --- /dev/null	2016-11-02 09:33:10.665572379 +0800
 +++ linux.new/net/ipv4/netfilter/ipt_layer7.c	2016-11-02 10:18:42.591256872 +0800
-@@ -0,0 +1,701 @@
+@@ -0,0 +1,703 @@
 +/*
 +  Kernel module to match application layer (OSI layer 7) data in connections.
 +
@@ -1601,13 +1601,15 @@
 +	BUG_ON(ct == NULL);
 +	return (ct->counters[IP_CT_DIR_ORIGINAL].packets + ct->counters[IP_CT_DIR_REPLY].packets);
 +#else
-+	struct nf_conn_counter *acct;
++	struct nf_conn_acct *acct;
++	struct nf_conn_counter *counter;
 +
 +	BUG_ON(ct == NULL);
 +	acct = nf_conn_acct_find(ct);
 +	if (!acct)
 +		return 0;
-+	return (atomic64_read(&acct[IP_CT_DIR_ORIGINAL].packets) + atomic64_read(&acct[IP_CT_DIR_REPLY].packets));
++	counter = acct->counter;
++	return (atomic64_read(&counter[IP_CT_DIR_ORIGINAL].packets) + atomic64_read(&counter[IP_CT_DIR_REPLY].packets));
 +#endif
 +}
 +
@@ -2180,7 +2182,7 @@
 +	.name		= "layer7",
 +	.family		= AF_INET,
 +	.checkentry	= check,
-+	.match		= match,
++	.match		= &match,
 +	.destroy	= destroy,
 +	.matchsize	= sizeof(struct xt_layer7_info),
 +	.me		= THIS_MODULE
@@ -3715,7 +3717,7 @@
 +extern struct timezone sys_tz;
 +
 +
-+static bool match(const struct sk_buff *skb, const struct xt_action_param *par)
++static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 +{
 +	const struct ipt_timerange_info *info = (const struct ipt_timerange_info*)(par->matchinfo);
 +
@@ -3786,7 +3788,7 @@
 +static struct xt_match timerange_match  __read_mostly = 
 +{
 +	.name		= "timerange",
-+	.match		= &match,
++	.match		= match,
 +	.family		= AF_INET,
 +	.matchsize	= sizeof(struct ipt_timerange_info),
 +	.checkentry	= &checkentry,

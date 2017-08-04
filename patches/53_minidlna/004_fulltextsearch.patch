@@ -1,8 +1,16 @@
-diff --git a/inotify.c b/inotify.c
+diff --git a/monitor.c b/monitor.c
 index 745436c..6a09adc 100644
---- a/inotify.c
-+++ b/inotify.c
-@@ -358,6 +358,8 @@ inotify_insert_file(char * name, const char * path)
+--- a/monitor.c
++++ b/monitor.c
+@@ -270,6 +270,7 @@ monitor_remove_file(const char * path)
+ 	id = sql_get_text_field(db, "SELECT ID from %s where PATH = '%q'", playlist?"PLAYLISTS":"DETAILS", path);
+ 	if( !id )
+ 		return 1;
++	bk_destroy_bktable();
+ 	detailID = strtoll(id, NULL, 10);
+ 	sqlite3_free(id);
+ 	if( playlist )
+@@ -406,6 +407,8 @@ monitor_insert_file(char * name, const char * path)
  	if( stat(path, &st) != 0 )
  		return -1;
  
@@ -11,15 +19,7 @@ index 745436c..6a09adc 100644
  	ts = sql_get_int_field(db, "SELECT TIMESTAMP from DETAILS where PATH = '%q'", path);
  	if( !ts && is_playlist(path) && (sql_get_int_field(db, "SELECT ID from PLAYLISTS where PATH = '%q'", path) > 0) )
  	{
-@@ -549,6 +551,7 @@ inotify_remove_file(const char * path)
- 	id = sql_get_text_field(db, "SELECT ID from %s where PATH = '%q'", playlist?"PLAYLISTS":"DETAILS", path);
- 	if( !id )
- 		return 1;
-+	bk_destroy_bktable();
- 	detailID = strtoll(id, NULL, 10);
- 	sqlite3_free(id);
- 	if( playlist )
-@@ -614,6 +617,8 @@ inotify_remove_directory(int fd, const char * path)
+@@ -600,6 +603,8 @@ monitor_remove_directory(int fd, const char * path)
  	int64_t detailID = 0;
  	int rows, i, ret = 1;
  
@@ -27,7 +27,7 @@ index 745436c..6a09adc 100644
 +
  	/* Invalidate the scanner cache so we don't insert files into non-existent containers */
  	valid_cache = 0;
- 	remove_watch(fd, path);
+ 	if( fd > 0 )
 diff --git a/minidlna.c b/minidlna.c
 index 7933f54..aac977b 100644
 --- a/minidlna.c
@@ -99,7 +99,7 @@ diff --git a/upnpsoap.c b/upnpsoap.c
 index 8066318..c600b60 100644
 --- a/upnpsoap.c
 +++ b/upnpsoap.c
-@@ -1681,11 +1681,13 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+@@ -1739,11 +1739,13 @@
  	int ret;
  	const char *ContainerID;
  	char *Filter, *SearchCriteria, *SortCriteria;
@@ -114,7 +114,7 @@ index 8066318..c600b60 100644
  
  	memset(&args, 0, sizeof(args));
  	memset(&str, 0, sizeof(str));
-@@ -1753,13 +1755,119 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+@@ -1811,13 +1813,119 @@
  	where = parse_search_criteria(SearchCriteria, sep);
  	DPRINTF(E_DEBUG, L_HTTP, "Translated SearchCriteria: %s\n", where);
  
@@ -241,42 +241,28 @@ index 8066318..c600b60 100644
  	if( totalMatches < 0 )
  	{
  		/* Must be invalid SQL, so most likely bad or unhandled search criteria. */
-@@ -1785,17 +1893,23 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+@@ -1842,7 +1950,11 @@
+ 		SoapError(h, 709, "Unsupported or invalid sort criteria");
  		goto search_error;
  	}
- 
--	sql = sqlite3_mprintf( SELECT_COLUMNS
--	                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
--	                      " where OBJECT_ID glob '%q%s' and (%s) %s "
--	                      "%z %s"
--	                      " limit %d, %d",
--	                      ContainerID, sep, where, groupBy,
--	                      (*ContainerID == '*') ? NULL :
--	                      sqlite3_mprintf("UNION ALL " SELECT_COLUMNS
--	                                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
--	                                      " where OBJECT_ID = '%q' and (%s) ", ContainerID, where),
--	                      orderBy, StartingIndex, RequestedCount);
+-
++	
 +	if (BKcustomization)
 +	    sql = BKrequest;
 +	else
 +	{
-+	    sql = sqlite3_mprintf( SELECT_COLUMNS
-+	                          "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
-+	                          " where OBJECT_ID glob '%q%s' and (%s) %s "
-+	                          "%z %s"
-+	                          " limit %d, %d",
-+	                          ContainerID, sep, where, groupBy,
-+	                          (*ContainerID == '*') ? NULL :
-+	                          sqlite3_mprintf("UNION ALL " SELECT_COLUMNS
-+	                                          "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
-+	                                          " where OBJECT_ID = '%q' and (%s) ", ContainerID, where),
-+	                          orderBy, StartingIndex, RequestedCount);
+ 	sql = sqlite3_mprintf( SELECT_COLUMNS
+ 	                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
+ 	                      " where OBJECT_ID glob '%q%s' and (%s) %s "
+@@ -1854,6 +1966,7 @@
+ 	                                      "from OBJECTS o left join DETAILS d on (d.ID = o.DETAIL_ID)"
+ 	                                      " where OBJECT_ID = '%q' and (%s) ORDER BY d.date", ContainerID, where),
+ 	                      orderBy, StartingIndex, RequestedCount);
 +	}
-+
  	DPRINTF(E_DEBUG, L_HTTP, "Search SQL: %s\n", sql);
  	ret = sqlite3_exec(db, sql, callback, (void *) &args, &zErrMsg);
  	if( (ret != SQLITE_OK) && (zErrMsg != NULL) )
-@@ -1803,7 +1917,8 @@ SearchContentDirectory(struct upnphttp * h, const char * action)
+@@ -1861,7 +1974,8 @@
  		DPRINTF(E_WARN, L_HTTP, "SQL error: %s\nBAD SQL: %s\n", zErrMsg, sql);
  		sqlite3_free(zErrMsg);
  	}
@@ -286,7 +272,7 @@ index 8066318..c600b60 100644
  	ret = strcatf(&str, "&lt;/DIDL-Lite&gt;</Result>\n"
  	                    "<NumberReturned>%u</NumberReturned>\n"
  	                    "<TotalMatches>%u</TotalMatches>\n"
-@@ -1815,6 +1930,10 @@ search_error:
+@@ -1873,6 +1987,10 @@
  	ClearNameValueList(&data);
  	free(orderBy);
  	free(where);

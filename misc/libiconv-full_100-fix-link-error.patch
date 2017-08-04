@@ -1,0 +1,34 @@
+diff -Naur a/lib/aliases.h b/lib/aliases.h
+--- a/lib/aliases.h	2006-05-18 20:45:18.000000000 +0800
++++ b/lib/aliases.h	2017-08-02 20:01:13.735045700 +0800
+@@ -1680,8 +1680,12 @@
+ 
+ #ifdef __GNUC__
+ __inline
++#else
++#ifdef __cplusplus
++inline
+ #endif
+-const struct alias *
++#endif
++static const struct alias *
+ aliases_lookup (register const char *str, register unsigned int len)
+ {
+   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
+diff -Naur a/lib/iconv.c b/lib/iconv.c
+--- a/lib/iconv.c	2006-01-23 21:16:12.000000000 +0800
++++ b/lib/iconv.c	2017-08-02 19:58:15.885420300 +0800
+@@ -162,8 +162,12 @@
+ };
+ #ifdef __GNUC__
+ __inline
++#else
++#ifdef __cplusplus
++inline
+ #endif
+-const struct alias *
++#endif
++static const struct alias *
+ aliases2_lookup (register const char *str)
+ {
+   const struct alias * ptr;

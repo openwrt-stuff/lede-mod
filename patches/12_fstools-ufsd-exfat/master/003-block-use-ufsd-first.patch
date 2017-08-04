@@ -1,0 +1,149 @@
+diff -Naur b/CMakeLists.txt c/CMakeLists.txt
+--- b/CMakeLists.txt	2016-10-31 23:36:17.000000000 +0800
++++ c/CMakeLists.txt	2016-11-02 16:54:50.998559948 +0800
+@@ -39,6 +39,10 @@
+ 		libubi/ubiutils-common.c)
+ INSTALL(TARGETS ubi-utils ARCHIVE DESTINATION lib)
+ 
++ADD_LIBRARY(fsexist STATIC
++		libfsexist/fsexist.c)
++INSTALL(TARGETS fsexist ARCHIVE DESTINATION lib)
++
+ FIND_PATH(ubox_include_dir libubox/ulog.h)
+ INCLUDE_DIRECTORIES(${ubox_include_dir})
+ 
+@@ -59,9 +63,9 @@
+ ADD_EXECUTABLE(block block.c probe.c probe-libblkid.c)
+ IF(DEFINED CMAKE_UBIFS_EXTROOT)
+ 	ADD_DEFINITIONS(-DUBIFS_EXTROOT)
+-	TARGET_LINK_LIBRARIES(block blkid-tiny dl uci ubox ubus blobmsg_json ubi-utils ${json})
++	TARGET_LINK_LIBRARIES(block blkid-tiny dl uci ubox ubus blobmsg_json ubi-utils fsexist ${json})
+ ELSE(DEFINED CMAKE_UBIFS_EXTROOT)
+-	TARGET_LINK_LIBRARIES(block blkid-tiny dl uci ubox ubus blobmsg_json ${json})
++	TARGET_LINK_LIBRARIES(block blkid-tiny dl uci ubox ubus blobmsg_json fsexist ${json})
+ ENDIF(DEFINED CMAKE_UBIFS_EXTROOT)
+ INSTALL(TARGETS block RUNTIME DESTINATION sbin)
+ 
+diff -Naur b/block.c c/block.c
+--- b/block.c	2016-11-02 16:50:27.650350965 +0800
++++ c/block.c	2016-11-02 16:57:25.830772485 +0800
+@@ -45,6 +45,8 @@
+ 
+ #include "probe.h"
+ 
++#include "libfsexist/fsexist.h"
++
+ #ifdef UBIFS_EXTROOT
+ #include "libubi/libubi.h"
+ #endif
+@@ -1010,14 +1012,20 @@
+ 			param = mount_flags_to_string(m->flags);
+ 
+ 			if (strcmp(pr->type, "exfat"))
+-				snprintf(cmd, sizeof (cmd), "ntfs-3g -o \"%s\" %s %s >/dev/null",
+-					param, pr->dev, target);
+-
+-			else
++			{
++				const char fstype[]="ufsd";
++				if ( has_filesystem(fstype) ) {
++					err = mount(pr->dev, target, fstype, m->flags, (m->options) ? (m->options) : (""));
++                                } else {
++					snprintf(cmd, sizeof (cmd), "ntfs-3g -o \"%s\" %s %s >/dev/null",
++						param, pr->dev, target);
++					err = system(cmd);
++				}
++			} else {
+ 				snprintf(cmd, sizeof (cmd), "mount -t exfat -o \"%s\" %s %s >/dev/null",
+ 					param, pr->dev, target);
+-
+-			err = system(cmd);
++				err = system(cmd);
++                        }
+ 		}
+ 
+ 		if (err)
+diff -Naur b/libfsexist/fsexist.c c/libfsexist/fsexist.c
+--- b/libfsexist/fsexist.c	1970-01-01 08:00:00.000000000 +0800
++++ c/libfsexist/fsexist.c	2016-11-02 16:54:07.965683978 +0800
+@@ -0,0 +1,45 @@
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <errno.h>
++#include <string.h>
++#include <syslog.h>
++#include <libubox/ulog.h>
++
++#include "fsexist.h"
++
++bool has_filesystem(const char *str) {
++    FILE *fptr;
++    bool ret = false;
++    int size = strlen(str) + 3;
++    char buffer[size];
++    char *fstype = malloc(size);
++    strcpy(fstype, "\t");
++    strcat(fstype, str);
++    strcat(fstype, "\n");
++    buffer[size - 1] = fstype[size - 1];
++    fptr = fopen("/proc/filesystems", "r");
++    if (fptr == NULL)
++    {
++        ULOG_ERR("Unable to open /proc/filesystems (%s)", strerror(errno));
++        goto exit;
++    }
++    signed char c = fgetc(fptr);
++    while (c != EOF)
++    {
++        int i;
++        for (i = 0;i < size - 2;i ++)
++            buffer[i] = buffer[i + 1];
++        buffer[size - 2] = (char)c;
++        c = fgetc(fptr);
++        if (!strcmp(buffer, fstype))
++        {
++            ret = true;
++            ULOG_INFO("%s kernel space support detected!", str);
++        }
++    }
++exit:
++    fclose(fptr);
++    free(fstype);
++    return ret;
++} 
+diff -Naur b/libfsexist/fsexist.h c/libfsexist/fsexist.h
+--- b/libfsexist/fsexist.h	1970-01-01 08:00:00.000000000 +0800
++++ c/libfsexist/fsexist.h	2016-11-02 16:54:07.965683978 +0800
+@@ -0,0 +1,31 @@
++/*
++ * Copyright (C) 2013 The CyanogenMod Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef _FSEXIST_H
++#define _FSEXIST_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++bool has_filesystem(const char *str);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
++

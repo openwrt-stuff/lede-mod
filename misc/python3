@@ -1,0 +1,2 @@
+feeds/packages/lang/python/python3
+HOST_CONFIGURE_ARGS --disable-ipv6
