@@ -10,6 +10,8 @@ cd  $BUILDROOT
 
 ls $BASEDIR/patches/*/clean.sh | while read line
 do
+  echo "================="
+  echo "Executing ${line}"
 	bash ${line}
 done
 
@@ -19,6 +21,8 @@ git pull || exit 1
 
 ls $BASEDIR/patches/*/install.sh | while read line
 do
+  echo "================="
+  echo "Executing ${line}"
 	bash ${line}
 done
 
