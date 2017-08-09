@@ -1,4 +1,4 @@
-# openwrt
-Script that applies some custom patches to openwrt/lede
+# LEDE
+Script that applies some custom patches to lede
 
-Please link the folder to the root of openwrt/lede source tree
+Please soft-link the folder to the root of lede source tree
