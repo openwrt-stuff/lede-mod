@@ -1,7 +1,8 @@
 #!/bin/sh
 patchdir=$(cd `dirname $0`;pwd)
 basedir=$(cd `dirname $0`;cd ../../../;pwd)
-
+ 
 cd $basedir
 
-cat $patchdir/translations.txt >>  $basedir/feeds/luci/modules/luci-base/po/zh-cn/base.po
+patch -p1 < $patchdir/reg-wireless.patch
+patch -p1 < $patchdir/enable-wireless-default.patch

@@ -1566,7 +1566,7 @@ diff -Naupr linux-4.4.32_orig/net/netfilter/nf_queue.c linux-4.4.32/net/netfilte
 +		qh = rcu_dereference(queue_imq_handler);
 +#else
 +		BUG();
-+		goto err_unlock;
++		goto err;
 +#endif
 +	} else {
 +		qh = rcu_dereference(queue_handler);

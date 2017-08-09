@@ -1,0 +1,48 @@
+
+msgid "Force 40MHz mode"
+msgstr "强制40MHz频宽"
+
+msgid "Always use 40MHz channels even if the secondary channel overlaps. Using this option does not comply with IEEE 802.11n-2009!"
+msgstr "强制启用40MHz频宽并忽略辅助信道重叠。此选项不兼容IEEE 802.11n-2009!"
+
+msgid "Logging Level"
+msgstr "日志等级"
+
+msgid "Informational Message"
+msgstr "信息"
+
+msgid "Verbose Debugging"
+msgstr "详细调试"
+
+msgid "Debugging"
+msgstr "调试"
+
+msgid "Notification"
+msgstr "提醒"
+
+msgid "Warning"
+msgstr "警告"
+
+msgid "Beacon Interval"
+msgstr "信标间隔"
+
+msgid "Enable Legacy Rates"
+msgstr "启用旧的速率"
+
+msgid "Short Preamble"
+msgstr "短前导码"
+
+msgid "Wireless Client Isolation"
+msgstr "无线客户端隔离"
+
+msgid "DTIM Interval"
+msgstr "DTIM间隔"
+
+msgid "Delivery Traffic Indication Message Interval"
+msgstr "两个组播传送的间隔"
+
+msgid "Disassociate On Low Acknowledgement"
+msgstr "丢包率高时断开"
+
+msgid "Allow AP mode to disconnect STAs based on low ACK condition"
+msgstr "接入点模式下允许断开丢包率高的客户端"
