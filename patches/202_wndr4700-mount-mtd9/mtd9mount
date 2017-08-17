@@ -1,0 +1,62 @@
+#!/bin/sh /etc/rc.common
+
+#echo option force_space >> /etc/opkg.conf
+
+START=10
+
+mount_ubifs() {
+        if [ ! -c /dev/ubi9 ]; then
+          ubiattach -m 9 -d 9 || return 1
+        fi
+        mkdir -p /overlay_mtd9
+        mount -t ubifs -o rw,noatime /dev/ubi9_0 /overlay_mtd9
+        for DIR in root usr www
+        do
+          mkdir -p /overlay_mtd9/${DIR}
+          mkdir -p /overlay_mtd9/${DIR}_work
+          mount -o noatime,lowerdir=/rom/${DIR},upperdir=/overlay_mtd9/${DIR},workdir=/overlay_mtd9/${DIR}_work -t overlay "overlayfs:/overlay_mtd9/${DIR}" /${DIR}
+        done
+}
+
+umount_ubifs() {
+        if df /overlay_mtd9 2>/dev/null|grep -qoE '^/dev/ubi9_0' ; then
+          for DIR in root usr www
+          do
+            umount -l /${DIR}
+          done
+          umount /dev/ubi9_0
+        fi
+}
+
+init_ubifs() {
+        df /overlay_mtd9 2>/dev/null|grep -qoE '^/dev/ubi9_0' && return 1
+        if test -f /overlay/.mtd9_formatted
+        then
+          mount_ubifs
+        else
+          test -c /dev/ubi9 && ubidetach -m 9
+          echo -e '[ecos-volume]\nmode=ubi\nvol_id=0\nvol_type=dynamic\nvol_name=ecos\nvol_size=1MiB\nvol_flags=autoresize' > /tmp/ecos.ini
+          ubinize -p 128KiB -m 2048 -s 512 -o /tmp/ecos.img /tmp/ecos.ini
+          mtd -e /dev/mtd9 write /tmp/ecos.img ecos && touch /overlay/.mtd9_formatted || return 1
+          mount_ubifs
+          rm /tmp/ecos.* 
+        fi
+}
+
+boot() {
+        grep /proc/cpuinfo -qe 'WNDR4700' || return 1
+        df /overlay 2>/dev/null|grep -qoE '^/dev/ubi0_1' || return 1
+        df / 2>/dev/null|grep -qoE '^overlayfs:/overlay' || return 1
+        init_ubifs
+}
+
+start() {
+        grep /proc/cpuinfo -qe 'WNDR4700' || return 1
+        df /overlay 2>/dev/null|grep -qoE '^/dev/ubi0_1' || return 1
+        df / 2>/dev/null|grep -qoE '^overlayfs:/overlay' || return 1
+        init_ubifs
+}
+
+stop() {
+        umount_ubifs
+}

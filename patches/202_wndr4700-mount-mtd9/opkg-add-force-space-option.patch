@@ -1,0 +1,9 @@
+s--- a/package/system/opkg/files/opkg.conf	2017-07-30 
+09:50:20.273936988 +0000
++++ b/package/system/opkg/files/opkg.conf 2017-08-16 00:59:48.000000000 +0000
+@@ -2,3 +2,4 @@
+ dest ram /tmp
+ lists_dir ext /var/opkg-lists
++option force_space
+ option overlay_root /overlay
+\ No newline at end of file

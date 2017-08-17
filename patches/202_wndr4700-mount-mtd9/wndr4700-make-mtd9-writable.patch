@@ -1,0 +1,10 @@
+--- a/target/linux/apm821xx/dts/wndr4700.dts	2017-08-15 11:49:51.899438022 +0000
++++ b/target/linux/apm821xx/dts/wndr4700.dts  2017-08-10 10:30:26.000000000 +0000
+@@ -215,7 +215,6 @@
+ 			partition0,9@0x01fa0000 {
+ 				label = "ecos";
+ 				reg = <0x01fa0000 0x06020000>;
+-				read-only;
+ 			};
+ 
+ 			partition0,10@0x07fc0000 {

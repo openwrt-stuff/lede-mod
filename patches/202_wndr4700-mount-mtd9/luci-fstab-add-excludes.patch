@@ -1,0 +1,17 @@
+--- a/feeds/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/fstab.lua	2017-07-31 12:51:20.457093232 +0000
++++ b/feeds/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/fstab.lua 2017-08-15 11:53:28.000000000 +0000
+@@ -86,6 +86,14 @@
+               break
+           elseif (val.mountpoint == "/dev") then
+               break
++          elseif (val.mountpoint == "/overlay_mtd9") then
++              break
++          elseif (val.mountpoint == "/root") then
++              break
++          elseif (val.mountpoint == "/usr") then
++              break
++          elseif (val.mountpoint == "/www") then
++              break
+           end
+           val.umount = true
+       until true
