@@ -1,4 +1,4 @@
-#!/mnt/src/lede/ledesrc/staging_dir/host/bin/perl -w
+#!/usr/bin/perl -w
 # -*- Mode: perl; indent-tabs-mode: nil; c-basic-offset: 4  -*-
 # staging_dir/target-powerpc_464fp_musl-1.1.16/host/bin/intltool-update
 #

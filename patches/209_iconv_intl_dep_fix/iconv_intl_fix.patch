@@ -1,0 +1,355 @@
+diff -Naur a/feeds/packages/lang/python/Makefile b/feeds/packages/lang/python/Makefile
+--- a/feeds/packages/lang/python/Makefile	2017-11-28 12:46:50.149999998 +0000
++++ b/feeds/packages/lang/python/Makefile	2017-11-28 12:50:14.000000000 +0000
+@@ -73,7 +73,7 @@
+ define Package/python-light
+ $(call Package/python/Default)
+   TITLE:=Python $(PYTHON_VERSION) light installation
+-  DEPENDS:=+python-base +libffi +libbz2
++  DEPENDS:=+python-base +libffi +libbz2 $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/python-light/description
+diff -Naur a/feeds/packages/lang/python3/Makefile b/feeds/packages/lang/python3/Makefile
+--- a/feeds/packages/lang/python3/Makefile	2017-11-28 12:49:55.626666667 +0000
++++ b/feeds/packages/lang/python3/Makefile	2017-11-28 12:50:57.000000000 +0000
+@@ -65,7 +65,7 @@
+ define Package/python3-base
+ $(call Package/python3/Default)
+   TITLE:=Python $(PYTHON_VERSION) interpreter
+-  DEPENDS:=+libpthread +zlib
++  DEPENDS:=+libpthread +zlib $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/python3-base/description
+@@ -76,7 +76,7 @@
+ define Package/python3-light
+ $(call Package/python3/Default)
+   TITLE:=Python $(PYTHON_VERSION) light installation
+-  DEPENDS:=+python3-base +libffi +libbz2
++  DEPENDS:=+python3-base +libffi +libbz2 $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/python3-light/description
+diff -Naur a/feeds/packages/libs/gnutls/Makefile b/feeds/packages/libs/gnutls/Makefile
+--- a/feeds/packages/libs/gnutls/Makefile	2017-11-28 12:45:52.646666654 +0000
++++ b/feeds/packages/libs/gnutls/Makefile	2017-11-28 12:51:19.000000000 +0000
+@@ -96,7 +96,7 @@
+ define Package/libgnutls
+ $(call Package/gnutls/Default)
+   TITLE+= (library)
+-  DEPENDS+= +libnettle +!LIBNETTLE_MINI:libgmp +GNUTLS_EXT_LIBTASN1:libtasn1 +GNUTLS_PKCS11:p11-kit +GNUTLS_CRYPTODEV:kmod-cryptodev
++  DEPENDS+= +libnettle +!LIBNETTLE_MINI:libgmp +GNUTLS_EXT_LIBTASN1:libtasn1 +GNUTLS_PKCS11:p11-kit +GNUTLS_CRYPTODEV:kmod-cryptodev $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/libgnutls/description
+diff -Naur a/feeds/packages/libs/libv4l/Makefile b/feeds/packages/libs/libv4l/Makefile
+--- a/feeds/packages/libs/libv4l/Makefile	2017-11-28 12:47:58.303333327 +0000
++++ b/feeds/packages/libs/libv4l/Makefile	2017-11-28 12:51:46.000000000 +0000
+@@ -56,7 +56,7 @@
+   SECTION:=libs
+   CATEGORY:=Libraries
+   TITLE+= wrapper libraries
+-  DEPENDS := +libpthread +librt $(ICONV_DEPENDS)
++  DEPENDS := +libpthread +librt $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/libv4l/description
+@@ -68,7 +68,7 @@
+   SECTION:=utils
+   CATEGORY:=Utilities
+   TITLE+= utilities
+-  DEPENDS := +libv4l $(CXX_DEPENDS) $(ICONV_DEPENDS)
++  DEPENDS := +libv4l $(CXX_DEPENDS) $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/v4l-utils/description
+diff -Naur a/feeds/packages/net/netcat/Makefile b/feeds/packages/net/netcat/Makefile
+--- a/feeds/packages/net/netcat/Makefile	2017-11-28 12:46:20.189999994 +0000
++++ b/feeds/packages/net/netcat/Makefile	2017-11-28 12:52:48.000000000 +0000
+@@ -25,6 +25,7 @@
+   CATEGORY:=Network
+   TITLE:=A feature-rich network debugging and exploration tool.
+   URL:=http://netcat.sourceforge.net/
++  DEPENDS+= $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/netcat/description
+diff -Naur a/feeds/packages/net/ntpd/Makefile b/feeds/packages/net/ntpd/Makefile
+--- a/feeds/packages/net/ntpd/Makefile	2017-11-28 12:46:24.866666663 +0000
++++ b/feeds/packages/net/ntpd/Makefile	2017-11-28 12:53:03.000000000 +0000
+@@ -31,7 +31,7 @@
+   TITLE:=ISC ntp
+   MAINTAINER:=Peter Wagner <tripolar@gmx.at>
+   URL:=http://www.ntp.org/
+-  DEPENDS:=+libopenssl +libpthread +libcap
++  DEPENDS:=+libopenssl +libpthread +libcap $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/ntpd/Default/description
+diff -Naur a/feeds/packages/net/rsync/Makefile b/feeds/packages/net/rsync/Makefile
+--- a/feeds/packages/net/rsync/Makefile	2017-11-28 12:42:43.859999986 +0000
++++ b/feeds/packages/net/rsync/Makefile	2017-11-28 12:53:23.000000000 +0000
+@@ -28,7 +28,7 @@
+   CATEGORY:=Network
+   SUBMENU:=File Transfer
+   TITLE:=Fast remote file copy program (like rcp)
+-  DEPENDS:=+libpopt +RSYNC_xattr:libattr +RSYNC_acl:libacl +RSYNC_zlib:zlib
++  DEPENDS:=+libpopt +RSYNC_xattr:libattr +RSYNC_acl:libacl +RSYNC_zlib:zlib $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   URL:=http://rsync.samba.org/
+   MENU:=1
+ endef
+@@ -65,7 +65,7 @@
+   CATEGORY:=Network
+   SUBMENU:=File Transfer
+   TITLE:=Rsync daemon
+-  DEPENDS:=+rsync
++  DEPENDS:=+rsync $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   URL:=http://rsync.samba.org/
+ endef
+ 
+diff -Naur a/feeds/packages/net/tcpreplay/Makefile b/feeds/packages/net/tcpreplay/Makefile
+--- a/feeds/packages/net/tcpreplay/Makefile	2017-11-28 12:43:20.599999997 +0000
++++ b/feeds/packages/net/tcpreplay/Makefile	2017-11-28 12:53:45.000000000 +0000
+@@ -33,7 +33,7 @@
+   CATEGORY:=Network
+   URL:=http://tcpreplay.appneta.com/
+   MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>
+-  DEPENDS:=+librt +libpcap
++  DEPENDS:=+librt +libpcap $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/tcpbridge
+diff -Naur a/feeds/packages/sound/alsa-utils/Makefile b/feeds/packages/sound/alsa-utils/Makefile
+--- a/feeds/packages/sound/alsa-utils/Makefile	2017-11-28 12:42:40.063333326 +0000
++++ b/feeds/packages/sound/alsa-utils/Makefile	2017-11-28 12:53:58.000000000 +0000
+@@ -40,7 +40,7 @@
+   SECTION:=sound
+   CATEGORY:=Sound
+   TITLE:=ALSA utilities test data (adds ~1.3M to image)
+-  DEPENDS:=+alsa-lib +libpthread
++  DEPENDS:=+alsa-lib +libpthread $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   URL:=http://www.alsa-project.org/
+ endef
+ 
+diff -Naur a/feeds/packages/utils/bash/Makefile b/feeds/packages/utils/bash/Makefile
+--- a/feeds/packages/utils/bash/Makefile	2017-11-28 12:44:14.896666666 +0000
++++ b/feeds/packages/utils/bash/Makefile	2017-11-28 12:54:09.000000000 +0000
+@@ -30,7 +30,7 @@
+   CATEGORY:=Utilities
+   SUBMENU:=Shells
+   TITLE:=The GNU Bourne Again SHell
+-  DEPENDS:=+libncurses
++  DEPENDS:=+libncurses $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   URL:=http://www.gnu.org/software/bash/
+ endef
+ 
+diff -Naur a/feeds/packages/utils/gnupg/Makefile b/feeds/packages/utils/gnupg/Makefile
+--- a/feeds/packages/utils/gnupg/Makefile	2017-11-28 12:44:32.246666665 +0000
++++ b/feeds/packages/utils/gnupg/Makefile	2017-11-28 12:54:17.000000000 +0000
+@@ -29,7 +29,7 @@
+   SECTION:=utils
+   CATEGORY:=Utilities
+   SUBMENU:=Encryption
+-  DEPENDS:=+zlib +libncurses +libreadline
++  DEPENDS:=+zlib +libncurses +libreadline $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   TITLE:=GNU privacy guard - a free PGP replacement
+   URL:=http://www.gnupg.org/
+ endef
+diff -Naur a/feeds/packages/utils/grep/Makefile b/feeds/packages/utils/grep/Makefile
+--- a/feeds/packages/utils/grep/Makefile	2017-11-28 12:44:27.186666665 +0000
++++ b/feeds/packages/utils/grep/Makefile	2017-11-28 12:54:26.000000000 +0000
+@@ -30,7 +30,7 @@
+   SECTION:=utils
+   CATEGORY:=Utilities
+   TITLE:=grep search utility - full version
+-  DEPENDS:=+libpcre
++  DEPENDS:=+libpcre $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   URL:=http://www.gnu.org/software/grep/
+ endef
+ 
+diff -Naur a/feeds/packages/utils/nano/Makefile b/feeds/packages/utils/nano/Makefile
+--- a/feeds/packages/utils/nano/Makefile	2017-11-28 12:44:37.533333331 +0000
++++ b/feeds/packages/utils/nano/Makefile	2017-11-28 12:54:33.000000000 +0000
+@@ -30,7 +30,7 @@
+   TITLE:=An enhanced clone of the Pico text editor
+   URL:=http://www.nano-editor.org/
+   MAINTAINER:=Jonathan Bennett <JBennett@incomsystems.biz>
+-  DEPENDS:=+libncurses
++  DEPENDS:=+libncurses $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/nano/description
+diff -Naur a/feeds/packages/utils/tar/Makefile b/feeds/packages/utils/tar/Makefile
+--- a/feeds/packages/utils/tar/Makefile	2017-11-28 12:44:42.216666660 +0000
++++ b/feeds/packages/utils/tar/Makefile	2017-11-28 12:54:44.000000000 +0000
+@@ -28,7 +28,7 @@
+ define Package/tar
+   SECTION:=utils
+   CATEGORY:=Utilities
+-  DEPENDS:=+PACKAGE_TAR_POSIX_ACL:libacl +PACKAGE_TAR_XATTR:libattr +PACKAGE_TAR_BZIP2:bzip2
++  DEPENDS:=+PACKAGE_TAR_POSIX_ACL:libacl +PACKAGE_TAR_XATTR:libattr +PACKAGE_TAR_BZIP2:bzip2 $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   EXTRA_DEPENDS:=$(if $(CONFIG_PACKAGE_TAR_XZ),xz)
+   TITLE:=GNU tar
+   URL:=http://www.gnu.org/software/tar/
+diff -Naur a/package/libs/popt/Makefile b/package/libs/popt/Makefile
+--- a/package/libs/popt/Makefile	2017-11-28 12:56:19.003333327 +0000
++++ b/package/libs/popt/Makefile	2017-11-28 12:56:55.000000000 +0000
+@@ -31,6 +31,7 @@
+   CATEGORY:=Libraries
+   TITLE:=A command line option parsing library
+   URL:=http://rpm5.org/files/popt/
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Build/Configure
+diff -Naur a/package/utils/util-linux/Makefile b/package/utils/util-linux/Makefile
+--- a/package/utils/util-linux/Makefile	2017-11-28 12:43:35.093333331 +0000
++++ b/package/utils/util-linux/Makefile	2017-11-28 13:00:45.000000000 +0000
+@@ -119,6 +119,7 @@
+ $(call Package/util-linux/Default)
+   TITLE:=discard sectors on a device
+   SUBMENU=Disc
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/blkdiscard/description
+@@ -130,7 +131,7 @@
+ define Package/blkid
+ $(call Package/util-linux/Default)
+   TITLE:=locate and print block device attributes
+-  DEPENDS:= +libblkid +libuuid
++  DEPENDS:= +libblkid +libuuid $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU=Disc
+ endef
+ 
+@@ -152,7 +153,7 @@
+ define Package/cfdisk
+ $(call Package/util-linux/Default)
+   TITLE:=display or manipulate disk partition table
+-  DEPENDS:= +libblkid +libncurses +libsmartcols +libfdisk +libmount
++  DEPENDS:= +libblkid +libncurses +libsmartcols +libfdisk +libmount $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU:=Disc
+ endef
+ 
+@@ -163,6 +164,7 @@
+ define Package/dmesg
+ $(call Package/util-linux/Default)
+   TITLE:=print or control the kernel ring buffer
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/dmesg/description
+@@ -172,7 +174,7 @@
+ define Package/fdisk
+ $(call Package/util-linux/Default)
+   TITLE:=manipulate disk partition table
+-  DEPENDS:= +libblkid +libsmartcols +libfdisk
++  DEPENDS:= +libblkid +libsmartcols +libfdisk $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU=Disc
+ endef
+ 
+@@ -183,7 +185,7 @@
+ define Package/findfs
+ $(call Package/util-linux/Default)
+   TITLE:=find a filesystem by label or UUID
+-  DEPENDS:= +libblkid
++  DEPENDS:= +libblkid $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU=Disc
+ endef
+ 
+@@ -195,6 +197,7 @@
+ define Package/flock
+ $(call Package/util-linux/Default)
+   TITLE:=manage locks from shell scripts
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/flock/description
+@@ -204,6 +207,7 @@
+ define Package/getopt
+ $(call Package/util-linux/Default)
+   TITLE:=parse command options (enhanced)
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/getopt/description
+@@ -223,6 +227,7 @@
+ define Package/logger
+ $(call Package/util-linux/Default)
+   TITLE:=a shell command interface to the syslog system log module
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/logger/description
+@@ -242,7 +247,7 @@
+ define Package/losetup
+ $(call Package/util-linux/Default)
+   TITLE:=set up and control loop devices
+-  DEPENDS:= +libsmartcols
++  DEPENDS:= +libsmartcols $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/losetup/description
+@@ -253,7 +258,7 @@
+ define Package/lsblk
+ $(call Package/util-linux/Default)
+   TITLE:=list block devices
+-  DEPENDS:= +libblkid +libmount +libsmartcols
++  DEPENDS:= +libblkid +libmount +libsmartcols $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU=Disc
+ endef
+ 
+@@ -274,7 +279,7 @@
+ define Package/mount-utils
+ $(call Package/util-linux/Default)
+   TITLE:=related (u)mount utilities
+-  DEPENDS+= +libmount +libsmartcols
++  DEPENDS+= +libmount +libsmartcols $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/mount-utils/description
+@@ -315,7 +320,7 @@
+ define Package/partx-utils
+ $(call Package/util-linux/Default)
+   TITLE:=inform kernel about the presence and numbering of on-disk partitions
+-  DEPENDS:= +libblkid +libsmartcols
++  DEPENDS:= +libblkid +libsmartcols $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU=Disc
+ endef
+ 
+@@ -349,7 +354,7 @@
+ $(call Package/util-linux/Default)
+   TITLE:=partition table manipulator for Linux
+   SUBMENU=Disc
+-  DEPENDS:= +libblkid +libfdisk +libsmartcols
++  DEPENDS:= +libblkid +libfdisk +libsmartcols $(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/sfdisk/description
+@@ -360,7 +365,7 @@
+ define Package/swap-utils
+ $(call Package/util-linux/Default)
+   TITLE:=swap space management utilities
+-  DEPENDS+= +libblkid
++  DEPENDS+= +libblkid $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU:=Filesystem
+ endef
+ 
+@@ -408,6 +413,7 @@
+ define Package/whereis
+ $(call Package/util-linux/Default)
+   TITLE:=locate the binary, source, and manual page files for a command
++  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
+ endef
+ 
+ define Package/whereis/description
+@@ -417,7 +423,7 @@
+ define Package/wipefs
+ $(call Package/util-linux/Default)
+   TITLE:=wipe a signature from a device
+-  DEPENDS:= +libblkid
++  DEPENDS:= +libblkid $(ICONV_DEPENDS) $(INTL_DEPENDS)
+   SUBMENU:=Disc
+ endef
+ 

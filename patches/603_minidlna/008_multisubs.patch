@@ -162,9 +162,9 @@ diff -Naur a/metadata.c b/metadata.c
  
  void
 diff -Naur a/monitor.c b/monitor.c
---- a/monitor.c	2017-05-17 20:55:17.000000000 +0000
-+++ b/monitor.c	2017-08-02 01:05:32.565604572 +0000
-@@ -320,6 +320,7 @@
+--- a/inotify.c 2017-05-17 20:55:17.000000000 +0000
++++ b/inotify.c	2017-08-02 01:05:32.565604572 +0000
+@@ -602,6 +602,7 @@
  		/* Now delete the actual objects */
  		sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
  		sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);
@@ -172,7 +172,7 @@ diff -Naur a/monitor.c b/monitor.c
  	}
  	snprintf(art_cache, sizeof(art_cache), "%s/art_cache%s", db_path, path);
  	remove(art_cache);
-@@ -619,6 +620,7 @@
+@@ -633,6 +634,7 @@
  				detailID = strtoll(result[i], NULL, 10);
  				sql_exec(db, "DELETE from DETAILS where ID = %lld", detailID);
  				sql_exec(db, "DELETE from OBJECTS where DETAIL_ID = %lld", detailID);

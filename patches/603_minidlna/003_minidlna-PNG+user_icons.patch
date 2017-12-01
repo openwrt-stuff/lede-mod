@@ -824,9 +824,9 @@ diff -Naur a/minidlna.c b/minidlna.c
 --- a/minidlna.c	2017-05-17 20:55:17.000000000 +0000
 +++ b/minidlna.c	2017-08-02 01:22:45.325380149 +0000
 @@ -95,6 +95,8 @@
+ #include "log.h"
  #include "tivo_beacon.h"
  #include "tivo_utils.h"
- #include "avahi.h"
 +#include "icons.h"
 +#include "image_utils.h"
  
@@ -1038,11 +1038,11 @@ diff -Naur a/options.c b/options.c
 --- a/options.c	2017-05-17 20:55:17.000000000 +0000
 +++ b/options.c	2017-08-02 01:26:03.000000000 +0000
 @@ -67,6 +67,13 @@
- 	{ MERGE_MEDIA_DIRS, "merge_media_dirs" },
- 	{ WIDE_LINKS, "wide_links" },
- 	{ TIVO_DISCOVERY, "tivo_discovery" },
+ 	{ FORCE_SORT_CRITERIA, "force_sort_criteria" },
+ 	{ MAX_CONNECTIONS, "max_connections" },
+ 	{ MERGE_MEDIA_DIRS, "merge_media_dirs" }
 +#ifdef HAVE_LIBPNG
-+	{ ICON, "icon" },
++	,{ ICON, "icon" },
 +#endif
 +	{ PNG_ICON_SM, "png_icon_sm" },
 +	{ PNG_ICON_LRG, "png_icon_lrg" },
@@ -1055,17 +1055,17 @@ diff -Naur a/options.h b/options.h
 --- a/options.h	2017-05-17 20:55:17.000000000 +0000
 +++ b/options.h	2017-08-02 01:26:57.000000000 +0000
 @@ -60,6 +60,14 @@
- 	MERGE_MEDIA_DIRS,		/* don't add an extra directory level when there are multiple media dirs */
- 	WIDE_LINKS,			/* allow following symlinks outside the defined media_dirs */
- 	TIVO_DISCOVERY,			/* TiVo discovery protocol: bonjour or beacon. Defaults to bonjour if supported */
+ 	FORCE_SORT_CRITERIA,		/* force sorting by a given sort criteria */
+ 	MAX_CONNECTIONS,		/* maximum number of simultaneous connections */
+ 	MERGE_MEDIA_DIRS		/* don't add an extra directory level when there are multiple media dirs */
++#ifdef HAVE_LIBPNG
++	,ICON,					/* user-supplied PNG icon */
++#endif
 +	/* user-supplied icons */
 +	PNG_ICON_SM,
 +	PNG_ICON_LRG,
 +	JPEG_ICON_SM,
 +	JPEG_ICON_LRG
-+#ifdef HAVE_LIBPNG
-+	,ICON					/* user-supplied PNG icon */
-+#endif
  };
  
  /* readoptionsfile()

@@ -4,6 +4,7 @@ libintl-full
 +PACKAGE_libintl-full:libintl-full
   DEPENDS+= +PACKAGE_libintl-full:libintl-full
   DEPENDS+= +PACKAGE_libintl-full:libintl-full +PACKAGE_libiconv-full:libiconv-full
+  DEPENDS+=$(ICONV_DEPENDS) $(INTL_DEPENDS)
   
 package/libs/libiconv-full (define Package/iconv)
 
